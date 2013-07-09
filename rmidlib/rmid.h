@@ -19,6 +19,17 @@
 #define RMID_TYPE_CON	0x0016 // Container
 #define RMID_TYPE_LIP	0x0023 
 
+#define RMID_MAT_PARAM_COLOR1	0xCE454C77 // Color Texture 1
+#define RMID_MAT_PARAM_UNK2		0xA9AA497A // V=0x00000000
+#define RMID_MAT_PARAM_COLOR2	0x9CB8070C // Color Texture 2
+#define RMID_MAT_PARAM_UNK4		0xAD54B293 // V=0x00000000
+#define RMID_MAT_PARAM_SPECULAR	0x516B333C // Specular Texture
+#define RMID_MAT_PARAM_NORMAL	0xD6140246 // Normal Texture
+#define RMID_MAT_PARAM_UNK7		0x44453BE5 // V=0x00000000
+#define RMID_MAT_PARAM_UNK8		0x1592FD62 // V=0x00000000
+#define RMID_MAT_PARAM_UNK9		0x761532CF // V=0x00000000
+#define RMID_MAT_PARAM_COLOR3	0x716D7442 // Color texture 3
+
 #pragma pack(push, 1)
 typedef struct {
 	unsigned long long data_offset_offset; 
@@ -226,13 +237,13 @@ typedef struct {
 } mes_material_header;
 
 typedef struct {
-	uint32_t unk1;
-	uint32_t unk2;
-	uint32_t unk3;
-	uint32_t unk4;
+	uint32_t unk1; // 64
+	uint32_t unk2; // 0
+	uint32_t unk3; // 0
+	uint32_t unk4; // 0
 
-	uint32_t unk5;
-	uint32_t unk6;
+	uint32_t param_type; // Param type ID
+	uint32_t texture_id; // 
 	uint32_t unk7;
 	uint32_t unk8;
 

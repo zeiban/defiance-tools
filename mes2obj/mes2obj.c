@@ -36,6 +36,7 @@ void Usage(void)
 int main( int argc, const char* argv[])
 {
 	int i;
+	int pi;
 	wad_file wf;
 	wad_record wr;
 	rmid_file rf;
@@ -59,6 +60,7 @@ int main( int argc, const char* argv[])
 	uint32_t i2;
 	mes_mesh_header * mesh_header;
 	mes_material_header * material_header;
+	mes_material_param * material_params;
 
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
@@ -131,18 +133,26 @@ int main( int argc, const char* argv[])
 				mesh_material_records = (uint32_t*)(data + mh->mesh_material_table_offset);
 				material_records = (mes_material_record*)(data + mh->material_table_offset);
 				total_meshes = (uint32_t *)&material_records[mh->total_materials];
+
 				printf("0x%08X %s\n", EndianSwap(wr.id), wr.name);
+
 				printf("Materials\n");
 				for(i2 = 0;  i2 < mh->total_materials; i2++) {
-					material_header = (data + material_records[i2].offset);	
+					material_header = (mes_material_header *)(data + material_records[i2].offset);	
 					printf(" [%d] %d", i2, material_records[i2].offset);
 					printf(" %d", material_records[i2].size);
 					printf(" P=%d SID=0x%08X", material_header->total_material_params, EndianSwap(material_header->shader_id));
 					printf("\n", material_header->total_material_params, material_header->shader_id);
+
+					material_params = (mes_material_param *)(data + material_records[i2].offset + sizeof(mes_material_header));
+					for(pi = 0; pi < material_header->total_material_params; pi++) {
+						printf("\t[%d] T=0x%08X V=0x%08X\n", pi, EndianSwap(material_params[pi].param_type), EndianSwap(material_params[pi].texture_id));
+					}
 				}
+
 				printf("Meshes\n");
 				for(i2 = 0;  i2 < *total_meshes; i2++) {
-					mesh_header = (data + mesh_records[i2].offset);	
+					mesh_header = (mes_mesh_header*)(data + mesh_records[i2].offset);	
 					printf(" [%d] O=%d", i2+1, mesh_records[i2].offset);
 					printf(" S=%d", mesh_records[i2].size);
 					printf(" BPV=%d", mesh_header->bytes_per_vertex);
