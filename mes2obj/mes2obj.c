@@ -40,6 +40,7 @@ int main( int argc, const char* argv[])
 	uint32_t mi;
 	wad_file wf;
 	wad_record wr;
+	wad_file2 wf2;
 	rmid_file rf;
 	FILE * in_file;
 	void * out_data = NULL;
@@ -96,6 +97,12 @@ int main( int argc, const char* argv[])
 	} else {
 		strcpy_s(wad_out_dir, sizeof(wad_out_dir), out_dir); 
 	}
+	
+	WadFileLoad(&wf2, wad_file);
+	for(mi = 0; mi < wf2.total_records; mi++) {
+		printf("%d\n", wf2.records[mi].type);
+	}
+	WadFileFree(&wf2);
 
 	if(WadOpen(&wf, wad_file) != 0) {
 		printf("Failed to open WAD file %s", wad_file);

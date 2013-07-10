@@ -32,17 +32,18 @@ typedef struct
 
 typedef struct
 {
-	struct wad_file2 * file;
+	char * filename;
 	uint32_t id;
 	uint32_t type;
 	uint64_t name_offset;
-	uint8_t * name;
-
+	char * name;
+	uint64_t data_offset;
+	uint64_t data_size;
 } wad_record2;
 
 typedef struct
 {
-	uint8_t * filename;
+	int8_t * filename;
 	uint32_t total_records;
 	wad_record2 * records;
 } wad_file2;
@@ -65,8 +66,9 @@ int WadRecordToFile(wad_file * wf, wad_record * wr, const char * filename);
 // Closes the wad file should always be called after WadOpen()
 void WadClose(wad_file * wf);
 
-int WadLoad(wad_file2 * wf, const uint8_t* filename);
-void WadFree(wad_file2 * wf);
+int WadFileLoad(wad_file2 * wf, const char * filename);
+int WadRecordResolveName(wad_record2 * wr);
+void WadFileFree(wad_file2 * wf);
 //int WadLoadDirectory(wad_dir * wd, uint8_t *);
 //void WadFreeDirectory(wad_dir * wd);
 #endif // _WADLIB_H_
