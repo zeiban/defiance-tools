@@ -36,7 +36,8 @@ void Usage(void)
 int main( int argc, const char* argv[])
 {
 	int i;
-	int pi;
+	uint32_t pi;
+	uint32_t mi;
 	wad_file wf;
 	wad_record wr;
 	rmid_file rf;
@@ -151,10 +152,10 @@ int main( int argc, const char* argv[])
 				}
 
 				printf("Meshes\n");
-				for(i2 = 0;  i2 < *total_meshes; i2++) {
-					mesh_header = (mes_mesh_header*)(data + mesh_records[i2].offset);	
-					printf(" [%d] O=%d", i2+1, mesh_records[i2].offset);
-					printf(" S=%d", mesh_records[i2].size);
+				for(mi = 0;  mi < *total_meshes; mi++) {
+					mesh_header = (mes_mesh_header*)(data + mesh_records[mi].offset);	
+					printf(" [%d] O=%d", mi, mesh_records[mi].offset);
+					printf(" S=%d", mesh_records[mi].size);
 					printf(" BPV=%d", mesh_header->bytes_per_vertex);
 					printf(" V=%d", mesh_header->num_vertices1);
 					printf(" I=%d\n", mesh_header->num_indices1);
