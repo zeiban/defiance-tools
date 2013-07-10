@@ -100,7 +100,8 @@ int main( int argc, const char* argv[])
 	
 	WadFileLoad(&wf2, wad_file);
 	for(mi = 0; mi < wf2.total_records; mi++) {
-		printf("%d\n", wf2.records[mi].type);
+		WadRecordResolveName(&wf2.records[mi]);
+		printf("%s\n", wf2.records[mi].name);
 	}
 	WadFileFree(&wf2);
 

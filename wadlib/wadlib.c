@@ -150,6 +150,7 @@ int WadFileLoad(wad_file2 * wf, const char * filename)  {
 			wf->records[total_records_read].type = wir.type;
 			wf->records[total_records_read].name_offset = wir.name_offset;
 			wf->records[total_records_read].data_offset = wir.data_offset;
+			wf->records[total_records_read].name = NULL;
 			wf->records[total_records_read].data_size = wir.data_size;
 			records_read++;
 			total_records_read++;
@@ -164,15 +165,43 @@ int WadFileLoad(wad_file2 * wf, const char * filename)  {
 }
 int WadRecordResolveName(wad_record2 * wr) {
 	FILE * file;
+	wadf_header wh;
+	char name[256];
+
 	if(fopen_s(&file, wr->filename, "rb") != 0) {
 		return 1;
 	}
+
+	fread(&wh, sizeof(wh), 1, file);
+	if(wh.magic != WADF_MAGIC) {
+		return 1;
+	}
+
+	fseek(file, (long)wr->name_offset, SEEK_SET);
+	fread(&name, sizeof(name), 1, file);
+	wr->name = (char * )malloc(strlen(name)+1);
+	strcpy_s(wr->name, strlen(name)+1, name);
+
 	fclose(file);
 	return 0;
 }
 
 void WadFileFree(wad_file2 * wf) {
+	uint32_t i;
 	free(wf->filename);
+	for(i=0; i<wf->total_records; i++) {
+		if(wf->records[i].name != NULL) {
+			free(wf->records[i].name);
+		}
+	}
 	free(wf->records);
 }
 
+int WadDirLoad(wad_dir * wd, const char * filename) {
+}
+
+wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id) {
+}
+
+int WadDirFree(wad_dir * wd) {
+}

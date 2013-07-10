@@ -47,6 +47,12 @@ typedef struct
 	uint32_t total_records;
 	wad_record2 * records;
 } wad_file2;
+
+typedef struct {
+	uint32_t total_files;
+	wad_file2 * files;	
+} wad_dir;
+
 /*
 typedef struct
 {
@@ -66,9 +72,19 @@ int WadRecordToFile(wad_file * wf, wad_record * wr, const char * filename);
 // Closes the wad file should always be called after WadOpen()
 void WadClose(wad_file * wf);
 
+
+// Loads all the index records of a WAD file
 int WadFileLoad(wad_file2 * wf, const char * filename);
+
+// Resolves the asset name of the specified WAD index record
 int WadRecordResolveName(wad_record2 * wr);
+
+// Must be called after WadFileLoad to free memory
 void WadFileFree(wad_file2 * wf);
-//int WadLoadDirectory(wad_dir * wd, uint8_t *);
-//void WadFreeDirectory(wad_dir * wd);
+
+int WadDirLoad(wad_dir * wd, const char * filename);
+wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id);
+int WadDirFree(wad_dir * wd);
+
+
 #endif // _WADLIB_H_
