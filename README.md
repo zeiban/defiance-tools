@@ -3,8 +3,10 @@
 
 ## Overview ##
 
-These are a series of tools to extract various assets from the PC version of Defiance. If you are just curious about the WAD archive and it's internal RMID asset formats take a look in the wadlib/wadf.h and rmidlib/rmid.h files. The tools have all be developed with Visual Studio 2010 and the solution/projects are included. A lot of the code is very Windows specific so porting would take some effort.   
+These are a series of tools to extract various assets from the PC version of Defiance. If you are just curious about the WAD archive and it's internal RMID asset formats take a look in the wadlib/wadf.h and rmidlib/rmid.h files. The code is quite a mess while I figure out the formats dispite rewriting everyhing several times. 
 
+## Compiling ##
+All the tools were created using Visual C++ Exress 2010. If you have that would should be good to go. All the depenancies like zlib and libpng are included in the solution. 
 
 ## Tools ##
 ### waddiff ###
@@ -17,13 +19,11 @@ Used to dump individual assets from WAD files. It will decompress any compressed
 Used to extract and convert audio (Type 9) assets to playable WAV files.  
 
 ### tex2png ###
-Used to extract and convert textures (Type 3) assets to playable PNG files. 
+Used to extract and convert textures (Type 3) assets to viewable PNG files. Only the largest mipmap is extracted.
 
 ### mes2obj ###
+THIS IS A WORK IN PROGRESS AND DOES NOT WORK YET
 Used to extract and convert static meshes (Type 4) and related texture assets to OBJ, MTL & PNG files. 
-
-### ski2obj ###
-Used to extract and convert skelatal meshes (Type 7) and related texture assets to OBJ, MTL & PNG files. 
   
 ## Libraries ##
 ### wadlib ###

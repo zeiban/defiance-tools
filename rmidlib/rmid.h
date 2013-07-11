@@ -29,7 +29,7 @@
 #define RMID_MAT_PARAM_UNK8		0x1592FD62 // V=0x00000000
 #define RMID_MAT_PARAM_UNK9		0x761532CF // V=0x00000000
 #define RMID_MAT_PARAM_COLOR3	0x716D7442 // Color texture 3
-
+#define RMID_MAT_PARAM_EMISSIVE	0xFF780D7C // Emissive Texture (glow)
 #pragma pack(push, 1)
 typedef struct {
 	unsigned long long data_offset_offset; 

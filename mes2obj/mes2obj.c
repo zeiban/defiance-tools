@@ -90,15 +90,6 @@ int main( int argc, const char* argv[])
 		return 1;
 	}
 
-
-	
-	//WadFileLoad(&wf2, wad_file);
-	//for(mi = 0; mi < wf2.total_records; mi++) {
-	//	WadRecordResolveName(&wf2.records[mi]);
-	//	printf("%s\n", wf2.records[mi].name);
-	//}
-	//WadFileFree(&wf2);
-
 	printf("Input: %s\n", wad_dir);
 	if(search_name != NULL) {
 		printf("Search String: \"%s\"\n", search_name);
@@ -180,14 +171,14 @@ int main( int argc, const char* argv[])
 						printf(" BPV=%d", mesh_header->bytes_per_vertex);
 						printf(" V=%d", mesh_header->num_vertices1);
 						printf(" I=%d\n", mesh_header->num_indices1);
-
+						
 					}
 					RmidFree(&rf);
 					fclose(in_file);
 				}
 			}
 		}
-	}
+	} 
 	WadDirFree(&wd);
 
 	/*
