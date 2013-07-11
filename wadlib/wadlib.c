@@ -168,6 +168,10 @@ int WadRecordResolveName(wad_record2 * wr) {
 	wadf_header wh;
 	char name[256];
 
+	if(wr->name != NULL) {
+		return 0;
+	}
+
 	if(fopen_s(&file, wr->filename, "rb") != 0) {
 		return 1;
 	}
@@ -197,11 +201,67 @@ void WadFileFree(wad_file2 * wf) {
 	free(wf->records);
 }
 
-int WadDirLoad(wad_dir * wd, const char * filename) {
+int WadDirLoad(wad_dir * wd, const char * dir) {
+	WIN32_FIND_DATA ffd;
+	HANDLE hFind;
+	char search_dir[1024];
+	char wad_filename[1024];
+	uint32_t count = 0;
+
+	sprintf_s(search_dir, sizeof(search_dir), "%s\\*.wad",dir);
+	
+	hFind = FindFirstFile(search_dir, &ffd);
+	if(hFind == INVALID_HANDLE_VALUE) {
+		return 1;
+	}
+
+	do {
+		if(!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+			count++;
+		}
+	} while(FindNextFile(hFind, &ffd) != 0);
+	FindClose(hFind);
+	wd->total_files = count;
+	wd->files = (wad_file2*)malloc(sizeof(wad_file2) * wd->total_files);
+
+	count=0;
+	hFind = FindFirstFile(search_dir, &ffd);
+	do 
+	{
+		if(!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			sprintf_s(wad_filename, sizeof(wad_filename), "%s\\%s", dir, ffd.cFileName);
+			if(WadFileLoad(&wd->files[count], wad_filename) != 0) {
+				break;
+			}
+			count++;
+		}
+	}
+	while(FindNextFile(hFind, &ffd) != 0);
+
+	FindClose(hFind);
+	return 0;
 }
 
 wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id) {
+	uint32_t f;
+	uint32_t r;
+
+	for(f = 0; f < wd->total_files; f++) {
+		for(r = 0; r < wd->files[f].total_records; r++) {
+			if(wd->files[f].records[r].id == id) {
+				return &wd->files[f].records[r];
+			}
+		}
+	}
+	return NULL;
 }
 
-int WadDirFree(wad_dir * wd) {
+void WadDirFree(wad_dir * wd) {
+	uint32_t i;
+
+	for(i=0; i<wd->total_files; i++) {
+		WadFileFree(&wd->files[i]);
+	}
+	free(wd->files);
 }

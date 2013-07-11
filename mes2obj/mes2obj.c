@@ -26,9 +26,9 @@ unsigned int EndianSwap(unsigned int x)
 
 void Usage(void)
 {
-	printf("Usage mes2obj.exe  [-i <wad_file>] [-o <output_dir>] [-s <search_name>] [-c]\n");
+	printf("Usage mes2obj.exe  [-w <wad_dir>] [-s <search_name>] [-o <output_dir>]\n");
 	printf("Extracts Defiance meshes and converts them to OBJ files\n");
-	printf("-i\t Input WAD filename\n");
+	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 }
@@ -36,30 +36,32 @@ void Usage(void)
 int main( int argc, const char* argv[])
 {
 	int i;
-	uint32_t pi;
-	uint32_t mi;
-	wad_file wf;
-	wad_record wr;
-	wad_file2 wf2;
+	uint32_t f;
+	uint32_t r;
+	uint32_t m;
+	uint32_t p;
+	wad_dir wd;
+
+	wad_file2 * wf;
+	wad_record2 * wr;
+	wad_record2 * twr;
+	wad_record2 * swr;
+
 	rmid_file rf;
 	FILE * in_file;
 	void * out_data = NULL;
 	unsigned int out_size = 0;
-	char basename[256];
-	char wad_out_dir[256];
 
-	const char * wad_file = NULL;
+	const char * wad_dir = NULL;
 	const char * out_dir = NULL;
 	const char * search_name = NULL;
-	const char * mss_redist_dir = NULL;
-	int create_dir = 0;
+
 	uint8_t * data;
 	mes_header * mh;
 	mes_mesh_record * mesh_records;
 	mes_material_record * material_records;
 	uint32_t * mesh_material_records;
 	uint32_t * total_meshes;
-	uint32_t i2;
 	mes_mesh_header * mesh_header;
 	mes_material_header * material_header;
 	mes_material_param * material_params;
@@ -67,9 +69,9 @@ int main( int argc, const char* argv[])
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
 	for(i=0; i<argc; i++) {
-		if(strcmp(argv[i],"-i") == 0) {
+		if(strcmp(argv[i],"-w") == 0) {
 			if(argc>i) {
-				wad_file = argv[++i];
+				wad_dir = argv[++i];
 			}
 		} else if(strcmp(argv[i],"-o") == 0) {
 			if(argc>i) {
@@ -79,45 +81,116 @@ int main( int argc, const char* argv[])
 			if(argc>i) {
 				search_name = argv[++i];
 			}
-		} else if(strcmp(argv[i],"-c") == 0) {
-			create_dir = 1;
 		} 
 	}
 	
-	if(wad_file == NULL) {
+	if(wad_dir == NULL) {
 		printf("-i required\n");
 		Usage();
 		return 1;
 	}
 
 
-	if(create_dir) {
-		_splitpath_s(wad_file,NULL,0,NULL,0,basename,sizeof(basename),NULL,0);
-		sprintf_s(wad_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
-	} else {
-		strcpy_s(wad_out_dir, sizeof(wad_out_dir), out_dir); 
-	}
 	
-	WadFileLoad(&wf2, wad_file);
-	for(mi = 0; mi < wf2.total_records; mi++) {
-		WadRecordResolveName(&wf2.records[mi]);
-		printf("%s\n", wf2.records[mi].name);
-	}
-	WadFileFree(&wf2);
+	//WadFileLoad(&wf2, wad_file);
+	//for(mi = 0; mi < wf2.total_records; mi++) {
+	//	WadRecordResolveName(&wf2.records[mi]);
+	//	printf("%s\n", wf2.records[mi].name);
+	//}
+	//WadFileFree(&wf2);
 
-	if(WadOpen(&wf, wad_file) != 0) {
-		printf("Failed to open WAD file %s", wad_file);
-		return;
-	}
-
-	printf("Input: %s\n", wad_file);
+	printf("Input: %s\n", wad_dir);
 	if(search_name != NULL) {
 		printf("Search String: \"%s\"\n", search_name);
 	}
 
-	printf("Output directory: %s\n", wad_out_dir);
-	printf("Processing %d records\n", wf.total_records);
+	printf("Output directory: %s\n", out_dir);
 
+	printf("Loading WAD files\n");
+	if(WadDirLoad(&wd, wad_dir) != 0) {
+		printf("Failed to open WAD files in %s", wad_dir);
+		return;
+	}
+	printf("%d files loaded\n",wd.total_files);
+	for(f = 0; f < wd.total_files; f++) {
+		for(r = 0; r < wd.files[f].total_records; r++) {
+			wr = &wd.files[f].records[r];
+			if(wr->type == RMID_TYPE_MES) {
+				if(WadRecordResolveName(wr) != 0) {
+					printf("Failed to resolve name for ID 0x%08X\n", EndianSwap(wr->id));
+				}
+
+				if(((search_name != NULL) && (strstr(wr->name,search_name) != NULL)) || search_name == NULL) {				
+					if(fopen_s(&in_file, wr->filename, "rb") != 0) {
+						printf("ERROR: Unable to open file %s\n", wr->filename);
+						continue;
+					}
+
+					fseek(in_file, wr->data_offset, SEEK_SET);
+
+					if(RmidLoad(in_file, wr->data_size, &rf) != 0) {
+						printf("ERROR: Failed to load RMID data\n");
+						fclose(in_file);
+						continue;
+					}
+	//				_mkdir(wad_out_dir);
+
+					data = (uint8_t *)rf.data;
+
+					mh = (mes_header*)(data + sizeof(rmid_header));
+				
+					mesh_records = (mes_mesh_record*)(data + mh->mesh_table_offset);
+					mesh_material_records = (uint32_t*)(data + mh->mesh_material_table_offset);
+					material_records = (mes_material_record*)(data + mh->material_table_offset);
+					total_meshes = (uint32_t *)&material_records[mh->total_materials];
+
+					printf("0x%08X %s\n", EndianSwap(wr->id), wr->name);
+
+					printf("Materials\n");
+					for(m = 0;  m < mh->total_materials; m++) {
+						material_header = (mes_material_header *)(data + material_records[m].offset);	
+//						printf(" [%d] %d", m, material_records[m].offset);
+//						printf(" %d", material_records[m].size);
+						swr = WadDirFindByID(&wd, material_header->shader_id);
+						if(swr == NULL) {
+							printf("Unable to find shader ID 0x%08X", EndianSwap(material_header->shader_id));
+							continue;
+						}
+						WadRecordResolveName(swr);
+						printf(" Shader %s\n", swr->name);
+//						printf("\n", material_header->total_material_params, material_header->shader_id);
+
+						material_params = (mes_material_param *)(data + material_records[m].offset + sizeof(mes_material_header));
+						for(p = 0; p < material_header->total_material_params; p++) {
+							printf("  [%d] T=0x%08X V=0x%08X ", p, EndianSwap(material_params[p].param_type), EndianSwap(material_params[p].texture_id));
+							if((twr = WadDirFindByID(&wd, material_params[p].texture_id)) == NULL) {
+								printf("\n");
+							} else {
+								WadRecordResolveName(twr);
+								printf("%s\n", twr->name);
+							}
+						}
+					}
+
+					printf("Meshes\n");
+					for(m = 0;  m < *total_meshes; m++) {
+						mesh_header = (mes_mesh_header*)(data + mesh_records[m].offset);	
+						printf(" [%d] O=%d", m, mesh_records[m].offset);
+						printf(" S=%d", mesh_records[m].size);
+						printf(" BPV=%d", mesh_header->bytes_per_vertex);
+						printf(" V=%d", mesh_header->num_vertices1);
+						printf(" I=%d\n", mesh_header->num_indices1);
+
+					}
+					RmidFree(&rf);
+					fclose(in_file);
+				}
+			}
+		}
+	}
+	WadDirFree(&wd);
+
+	/*
 	while(WadRecordRead(&wf, &wr, 1) > 0) {
 		if(((search_name != NULL) && (strstr(wr.name,search_name) != NULL)) || search_name == NULL) {
 			if(wr.type == RMID_TYPE_MES) {
@@ -175,5 +248,5 @@ int main( int argc, const char* argv[])
 		} 
 	}
 	WadClose(&wf);
-	printf("\n");
+	printf("\n");*/
 }

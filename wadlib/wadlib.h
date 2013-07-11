@@ -84,7 +84,7 @@ void WadFileFree(wad_file2 * wf);
 
 int WadDirLoad(wad_dir * wd, const char * filename);
 wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id);
-int WadDirFree(wad_dir * wd);
+void WadDirFree(wad_dir * wd);
 
 
 #endif // _WADLIB_H_
