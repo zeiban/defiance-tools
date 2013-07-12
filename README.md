@@ -3,7 +3,7 @@
 
 ## Overview ##
 
-These are a series of tools to extract various assets from the PC version of Defiance. If you are just curious about the WAD archive and it's internal RMID asset formats take a look in the wadlib/wadf.h and rmidlib/rmid.h files. The code is quite a mess while I figure out the formats dispite rewriting everyhing several times. 
+These are a series of tools to extract various assets from the PC version of Defiance. If you are just curious about the WAD archive and it's internal RMID asset formats take a look in the wadlib/wadf.h and rmidlib/rmid.h files. The code is quite a mess while I figure out the formats dispite rewriting everything several times. 
 
 ## Compiling ##
 All the tools were created using Visual C++ Exress 2010. If you have that would should be good to go. All the depenancies like zlib and libpng are included in the solution. 
