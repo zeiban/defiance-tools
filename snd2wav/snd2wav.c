@@ -26,7 +26,7 @@ unsigned int EndianSwap(unsigned int x)
 
 void Usage(void)
 {
-	printf("Usage snd2wav.exe  [-i <wad_file>] [-o <output_dir>] [-m <miles_redist>] [-n <search_name>] [-c]\n");
+	printf("Usage snd2wav.exe  [-i <wad_file>] [-o <output_dir>] [-m <miles_redist>] [-s <search_name>] [-c]\n");
 	printf("Extracts Defiance textures and converts them to PNG files\n");
 	printf("-i\t Input WAD filename\n");
 	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
@@ -92,7 +92,7 @@ int main( int argc, const char* argv[])
 				out_dir = argv[++i];
 			}
 		} 
-		else if(strcmp(argv[i],"-n") == 0) 
+		else if(strcmp(argv[i],"-s") == 0) 
 		{
 			if(argc>i) 
 			{
@@ -129,14 +129,13 @@ int main( int argc, const char* argv[])
 	{
 		_splitpath_s(wad_file,NULL,0,NULL,0,basename,sizeof(basename),NULL,0);
 		sprintf_s(wad_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
-		_mkdir(wad_out_dir);
 	} 
 	else 
 	{
 		strcpy_s(wad_out_dir, sizeof(wad_out_dir), out_dir); 
 	}
 
-	sprintf_s(dll_filename, sizeof(dll_filename), "%s\\live\\MilesRedist\\mss32.dll", mss_redist_dir);
+	sprintf_s(dll_filename, sizeof(dll_filename), "%s\\mss32.dll", mss_redist_dir);
 	module = LoadLibrary(dll_filename);
 	if(module == NULL)
 	{
@@ -176,6 +175,8 @@ int main( int argc, const char* argv[])
 		if(((search_string != NULL) && (strstr(wr.name,search_string) != NULL)) || search_string == NULL)
 		{
 			if(wr.type == RMID_TYPE_SND){
+				_mkdir(wad_out_dir);
+
 				printf("0x%08X %s ", EndianSwap(wr.id), wr.name);
 
 				if(fopen_s(&file, wad_file, "rb") != 0)
@@ -194,7 +195,8 @@ int main( int argc, const char* argv[])
 				data += sizeof(rmid_header);
 				data += sizeof(rmid_snd_header);
 				fn_AIL_set_redist_directory(mss_redist_dir);
-				result = fn_AIL_decompress_ASI(data,rf.size - sizeof(rmid_snd_header), ".binka", &out_data, &out_size, 0); 
+
+				result = fn_AIL_decompress_ASI(data,rf.size - (sizeof(rmid_snd_header)+sizeof(rmid_snd_header)), ".binka", &out_data, &out_size, 0); 
 				if(result == 0)
 				{
 					error = fn_AIL_last_error();

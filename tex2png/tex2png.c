@@ -223,11 +223,13 @@ int main( int argc, const char* argv[])
 				rmidth = (rmid_tex_header*)((uint8_t *)rf.data + sizeof(rmid_header));
 
 				bytes = ((uint8_t*)rf.data) + 96;
+				/*
 				printf("0x%08X", EndianSwap(wr.id)); 
 				for(i = 0; i<16; i++) {
 					printf(" %02X", *(bytes + i));
 				}
-				printf(" %dx%d Format=%d Unk2=%d, Unk3=%d %s ", rmidth->mmh1.width, rmidth->mmh1.height, rmidth->format, rmidth->unk2, rmidth->unk3, wr.name);
+				*/
+				printf("0x%08X %s ", EndianSwap(wr.id),  wr.name);
 				fflush(stdout);
 
 				_mkdir(full_out_dir);
