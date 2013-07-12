@@ -42,7 +42,6 @@ int main( int argc, const char* argv[])
 	uint32_t p;
 	wad_dir wd;
 
-	wad_file2 * wf;
 	wad_record2 * wr;
 	wad_record2 * twr;
 	wad_record2 * swr;
@@ -66,6 +65,7 @@ int main( int argc, const char* argv[])
 	mes_material_header * material_header;
 	mes_material_param * material_params;
 
+	printf("IN DEVELOPMENT DOES NOT WORK!!!!\n");
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
 	for(i=0; i<argc; i++) {
@@ -117,9 +117,9 @@ int main( int argc, const char* argv[])
 						continue;
 					}
 
-					fseek(in_file, wr->data_offset, SEEK_SET);
+					fseek(in_file, (long)wr->data_offset, SEEK_SET);
 
-					if(RmidLoad(in_file, wr->data_size, &rf) != 0) {
+					if(RmidLoad(in_file, (long)wr->data_size, &rf) != 0) {
 						printf("ERROR: Failed to load RMID data\n");
 						fclose(in_file);
 						continue;
@@ -137,11 +137,9 @@ int main( int argc, const char* argv[])
 
 					printf("0x%08X %s\n", EndianSwap(wr->id), wr->name);
 
-					printf("Materials\n");
+					printf("Materials %d\n", mh->total_materials);
 					for(m = 0;  m < mh->total_materials; m++) {
 						material_header = (mes_material_header *)(data + material_records[m].offset);	
-//						printf(" [%d] %d", m, material_records[m].offset);
-//						printf(" %d", material_records[m].size);
 						swr = WadDirFindByID(&wd, material_header->shader_id);
 						if(swr == NULL) {
 							printf("Unable to find shader ID 0x%08X", EndianSwap(material_header->shader_id));
@@ -149,7 +147,6 @@ int main( int argc, const char* argv[])
 						}
 						WadRecordResolveName(swr);
 						printf(" Shader %s\n", swr->name);
-//						printf("\n", material_header->total_material_params, material_header->shader_id);
 
 						material_params = (mes_material_param *)(data + material_records[m].offset + sizeof(mes_material_header));
 						for(p = 0; p < material_header->total_material_params; p++) {

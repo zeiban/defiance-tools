@@ -71,7 +71,6 @@ wad_info * ReadWadFile(const char * dir, const char * name)
 		{
 			strcpy_s(wi->records[count].name, sizeof(filename), wr.name);
 			wi->records[count].size = wr.size;
-		//	wi->records[count].parent = wi;
 			
 			
 			count++;
@@ -84,7 +83,6 @@ wad_info * ReadWadFile(const char * dir, const char * name)
 				next_update = time(NULL) + 1;
 			}
 		}
-//		printf("\b%d\n", wf.total_records);
 		printf("\n",count);
 		WadClose(&wf);
 	}

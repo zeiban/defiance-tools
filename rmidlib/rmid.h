@@ -5,6 +5,11 @@
 
 #define RMID_MAGIC 'DIMR'
 
+// shd_p_DeferredDiffuseSpecularNormalEmissive 52
+// shd_p_DeferredDiffuseSpecularNormal 52
+// shd_p_DeferredDualDiffuseSpecularNormal 64
+// shd_p_DeferredDiffuseSpecularEmissive 52
+// shd_p_DeferredAlphaTestDualDiffuseSpecularNormal 68
 #define RMID_TYPE_RAW	0x0001 // Raw data any format
 #define RMID_TYPE_SHD	0x0002 // Shader
 #define RMID_TYPE_TEX	0x0003 // Texture
@@ -340,13 +345,10 @@ typedef struct {
 
 	uint32_t	unk45;	
 	uint32_t	unk46;	
-	uint32_t	unk47;	
-	uint32_t	unk48;	
+	uint64_t	mesh_info_offset;	
 
-	uint32_t	unk49;	
-	uint32_t	unk50;	
-	uint32_t	unk51;	
-	uint32_t	unk52;	
+	uint64_t	vertex_data_offset; // from begining of mes_mesh_header	
+	uint64_t	index_data_offset; // from begining of mes_mesh_header	
 
 	uint32_t	unk53;	
 	uint32_t	unk54;	
@@ -359,6 +361,17 @@ typedef struct {
 	uint32_t	unk60;	
 } mes_mesh_header;
 
+typedef struct {
+	uint32_t	unk1; // Always 3	
+	uint32_t	unk2; // Always 0	
+	uint32_t	total_vertices;	
+	uint32_t	total_indices;	
+
+	uint32_t	unk6;	// Always 0
+	uint32_t	unk58;	// Always 0
+	uint32_t	unk59;	// Always 0
+	uint32_t	unk60;	// Always total_vertices - 1
+  } mes_mesh_info;
 typedef struct { //96 bytes
 	uint32_t unk1;
 	uint32_t unk2;
