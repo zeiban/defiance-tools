@@ -280,7 +280,7 @@ int main( int argc, const char* argv[])
 						image = (uint32_t *)data;
 						for(i = 0; i < 6; i++) {
 							for(m = 0; m < rmidth->mmh1.mipmap_count; m++) {
-								// Only save the 1st mipmap
+								// Only save the 1st mipmap 
 								if(m == 0) {
 									sprintf_s(out_filename,sizeof(out_filename), "%s\\%s-%d.png", full_out_dir, wr.name, i+1);
 									if(fopen_s(&out_file, out_filename, "wb") == 0) {

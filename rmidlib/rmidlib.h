@@ -14,8 +14,8 @@ typedef struct
 
 typedef struct 
 {
-	unsigned int id;
-	unsigned int type;
+	unsigned int id; // Asset ID
+	unsigned int type; // Asset type
 } rmid_reference;
 
 typedef struct

@@ -1,7 +1,7 @@
 #ifndef _WADF_H_
 #define _WADF_H_
 
-#define WADF_REC_TYPE_CON	0x0001 // 
+#define WADF_REC_TYPE_CON	0x0001 
 
 #define WADF_MAGIC 'FDAW'
 

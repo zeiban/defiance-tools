@@ -34,7 +34,6 @@ void Usage(void)
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 }
 
-//typedef int (CALLBACK* _AIL_decompress_ASI)(void *, int, char *, char *, unsigned int *, unsigned int);
 typedef int (CALLBACK* _AIL_decompress_ASI)(void *, unsigned int, char *, void **, unsigned int *, void* );
 typedef char* (CALLBACK* _AIL_last_error)();
 typedef int* (CALLBACK* _AIL_set_redist_directory)(const char *);

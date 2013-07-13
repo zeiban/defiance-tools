@@ -9,8 +9,7 @@
 
 #include "wadf.h"
 
-typedef struct 
-{
+typedef struct {
 	FILE * file;
 	char name[256];
 	unsigned int total_records;
@@ -20,8 +19,7 @@ typedef struct
 	unsigned int index_records_read;
 } wad_file;
 
-typedef struct
-{
+typedef struct {
 	int id;
 	unsigned int type;
 	long name_offset;
@@ -30,8 +28,7 @@ typedef struct
 	long size;
 } wad_record;
 
-typedef struct
-{
+typedef struct {
 	char * filename;
 	uint32_t id;
 	uint32_t type;
@@ -41,8 +38,7 @@ typedef struct
 	uint64_t data_size;
 } wad_record2;
 
-typedef struct
-{
+typedef struct {
 	int8_t * filename;
 	uint32_t total_records;
 	wad_record2 * records;
@@ -53,13 +49,6 @@ typedef struct {
 	wad_file2 * files;	
 } wad_dir;
 
-/*
-typedef struct
-{
-	uint32_t total_files;
-	wad_file2 * files;
-} wad_dir;
-*/
 // Opens a wad file for reading
 int WadOpen(wad_file * wf, const char * filename);
 
@@ -82,9 +71,13 @@ int WadRecordResolveName(wad_record2 * wr);
 // Must be called after WadFileLoad to free memory
 void WadFileFree(wad_file2 * wf);
 
+// Loads directory with WAD files and retives all the indexes
 int WadDirLoad(wad_dir * wd, const char * filename);
-wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id);
-void WadDirFree(wad_dir * wd);
 
+// Finds a WAD record by ID
+wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id);
+
+// Sould always be called after WadDirLoad
+void WadDirFree(wad_dir * wd);
 
 #endif // _WADLIB_H_

@@ -19,20 +19,19 @@ typedef struct {
 
 typedef struct {
 	char name[256];
-	int count;
+	uint32_t count;
 	record_info * records;
 } wad_info;
 
 typedef struct {
-	int count;
+	uint32_t count;
 	wad_info ** wads;
 } dir_info;
 
-void PrintPercentStatus(float percent)
-{
+void PrintPercentStatus(float percent) {
 	static char line[256];
 	static time_t next_update = 0;
-	unsigned int i = 0;
+	uint32_t i = 0;
 
 	if(next_update < time(NULL)) {
 		for(i = 0; i<strlen(line); i++) printf("\b");
@@ -42,8 +41,7 @@ void PrintPercentStatus(float percent)
 	}
 	
 }
-wad_info * ReadWadFile(const char * dir, const char * name) 
-{
+wad_info * ReadWadFile(const char * dir, const char * name) {
 	wad_file wf;
 	wad_record wr;
 	wad_info * wi;
@@ -57,8 +55,7 @@ wad_info * ReadWadFile(const char * dir, const char * name)
 	memset(line, 0, sizeof(line));	
 	sprintf_s(filename, sizeof(filename),"%s\\%s", dir, name);
 
-	if(WadOpen(&wf, filename) == 0)
-	{
+	if(WadOpen(&wf, filename) == 0) {
 		wi = (wad_info *)malloc(sizeof(wad_info));
 		strcpy_s(wi->name, sizeof(wi->name), name);
 		wi->count = wf.total_records;
@@ -67,8 +64,7 @@ wad_info * ReadWadFile(const char * dir, const char * name)
 
 		next_update = time(NULL);
 
-		while(WadRecordRead(&wf, &wr,1) == 1)
-		{
+		while(WadRecordRead(&wf, &wr,1) == 1) {
 			strcpy_s(wi->records[count].name, sizeof(filename), wr.name);
 			wi->records[count].size = wr.size;
 			
@@ -89,8 +85,7 @@ wad_info * ReadWadFile(const char * dir, const char * name)
 	return wi;
 }
 
-dir_info * ReadWadDirectory(const char * dir)
-{
+dir_info * ReadWadDirectory(const char * dir) {
 	WIN32_FIND_DATA ffd;
 	char search_dir[256];
 	HANDLE hFind;
@@ -109,10 +104,8 @@ dir_info * ReadWadDirectory(const char * dir)
 	}
 
 	// Count the number of WAD files
-	do 
-	{
-		if(!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-		{
+	do {
+		if(!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			count++;
 		}
 	}
@@ -128,15 +121,12 @@ dir_info * ReadWadDirectory(const char * dir)
 
 	count = 0;
 	hFind = FindFirstFile(search_dir, &ffd);
-	do 
-	{
-		if(!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-		{
+	do {
+		if(!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			wd->wads[count] = ReadWadFile(dir, ffd.cFileName);
 			count++;
 		}
-	}
-	while(FindNextFile(hFind, &ffd) != 0);
+	} while(FindNextFile(hFind, &ffd) != 0);
 
 	FindClose(hFind);
 	printf("\n", dir);
@@ -159,8 +149,7 @@ record_info * FindRecordInfo(char * name, dir_info* di)
 	}
 	return NULL;
 }
-void Usage() 
-{
+void Usage() {
 	printf("Usage wadsdiff.exe -f <from_wad_dir> -t <to_wad_dir> -o <out_csv_file> [-s <search>]\n");
 	printf("Compares two Defiance wad directories and tells you what was added, changed, or deleted\n");
 	printf("-f\t Directory to compare from\n");
@@ -169,8 +158,7 @@ void Usage()
 	printf("-s\t (Optional) Only report on assets with <search> in the name\n");
 }
 
-int main( int argc, const char* argv[])
-{
+int main( int argc, const char* argv[]) {
 	int count=0;
 	const char * from_dir;
 	const char * to_dir;
@@ -197,32 +185,23 @@ int main( int argc, const char* argv[])
 	
 	printf("WAD Difference Report Generator by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
-	for(i=0; i<argc; i++) 
-	{
+	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-f") == 0) {
 			if(argc>i) 
 			{
 				from_dir = argv[++i];
 			}
-		} 
-		else if(strcmp(argv[i],"-t") == 0) 
-		{
-			if(argc>i) 
-			{
+		} else if(strcmp(argv[i],"-t") == 0) {
+			if(argc>i) {
 				to_dir = argv[++i];
 			}
-		} 
-		else if(strcmp(argv[i],"-s") == 0) 
-		{
-			if(argc>i) 
-			{
+		} else if(strcmp(argv[i],"-s") == 0) {
+			if(argc>i) {
 				search = argv[++i];
 			}
 		} 
-		else if(strcmp(argv[i],"-o") == 0) 
-		{
-			if(argc>i) 
-			{
+		else if(strcmp(argv[i],"-o") == 0) {
+			if(argc>i) {
 				out_filename = argv[++i];
 			}
 		} 
@@ -232,19 +211,16 @@ int main( int argc, const char* argv[])
 	tdi = ReadWadDirectory(to_dir);
 	
 
-	if(fopen_s(&out_file, out_filename, "w") != 0)
-	{
+	if(fopen_s(&out_file, out_filename, "w") != 0) {
 		printf("Unable to create file [%s]\n", out_filename);
 		return 1;
 	} 
 
-	for(w = 0; w<fdi->count; w++) 
-	{
+	for(w = 0; w<fdi->count; w++) {
 		assets_to_check += fdi->wads[w]->count;
 	}
 
-	for(w = 0; w<tdi->count; w++) 
-	{
+	for(w = 0; w<tdi->count; w++) {
 		assets_to_check += tdi->wads[w]->count;
 	}
 
@@ -254,17 +230,13 @@ int main( int argc, const char* argv[])
 	
 	next_update = 0;
 
-	for(w = 0; w<fdi->count; w++) 
-	{
-		for(r = 0; r < fdi->wads[w]->count; r++) 
-		{
+	for(w = 0; w<fdi->count; w++) {
+		for(r = 0; r < fdi->wads[w]->count; r++) {
 			fri = &fdi->wads[w]->records[r];
 			tri = FindRecordInfo(fri->name, tdi);
 
-			if(((search != NULL) && (strstr(fri->name, search) != NULL)) || search == NULL)
-			{
-				if(tri == NULL) 
-				{
+			if(((search != NULL) && (strstr(fri->name, search) != NULL)) || search == NULL) {
+				if(tri == NULL) {
 					fprintf(out_file, "\"D\",\"%s\",\"%s\",\"%d\"\n", fdi->wads[w]->name, fri->name);
 					deletes++;
 				}
@@ -279,18 +251,14 @@ int main( int argc, const char* argv[])
 		}
 	}
 	//To -> From for adds
-	for(w = 0; w<tdi->count; w++) 
-	{
-		for(r = 0; r<tdi->wads[w]->count; r++) 
-		{
+	for(w = 0; w<tdi->count; w++) {
+		for(r = 0; r<tdi->wads[w]->count; r++) {
 			tri = &tdi->wads[w]->records[r];
 
-			if(((search != NULL) && (strstr(tri->name, search) != NULL)) || search == NULL)
-			{
+			if(((search != NULL) && (strstr(tri->name, search) != NULL)) || search == NULL) {
 				fri = FindRecordInfo(tri->name, fdi);
 
-				if(fri == NULL) 
-				{
+				if(fri == NULL) {
 					fprintf(out_file,"\"A\",\"%s\",\"%s\",\"\"\n", tdi->wads[w]->name, tri->name);
 					adds++;
 				}

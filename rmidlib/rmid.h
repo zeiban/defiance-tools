@@ -10,6 +10,7 @@
 // shd_p_DeferredDualDiffuseSpecularNormal 64
 // shd_p_DeferredDiffuseSpecularEmissive 52
 // shd_p_DeferredAlphaTestDualDiffuseSpecularNormal 68
+
 #define RMID_TYPE_RAW	0x0001 // Raw data any format
 #define RMID_TYPE_SHD	0x0002 // Shader
 #define RMID_TYPE_TEX	0x0003 // Texture
