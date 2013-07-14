@@ -32,6 +32,7 @@ void Usage(void)
 	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
 	printf("-m\t Miles Sound System Redist directory. Usianlly in <game install dir>\\live\\MilesRedist \n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
+	printf("-c\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
 }
 
 typedef int (CALLBACK* _AIL_decompress_ASI)(void *, unsigned int, char *, void **, unsigned int *, void* );
@@ -76,37 +77,27 @@ int main( int argc, const char* argv[])
 
 	printf("Defiance Audio Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
-	for(i=0; i<argc; i++) 
-	{
+	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-i") == 0) {
-			if(argc>i) 
-			{
+			if(argc>i) {
 				wad_file = argv[++i];
 			}
 		} 
-		else if(strcmp(argv[i],"-o") == 0) 
-		{
-			if(argc>i) 
-			{
+		else if(strcmp(argv[i],"-o") == 0) {
+			if(argc>i) {
 				out_dir = argv[++i];
 			}
 		} 
 		else if(strcmp(argv[i],"-s") == 0) 
 		{
-			if(argc>i) 
-			{
+			if(argc>i) {
 				search_string = argv[++i];
 			}
-		} 
-		else if(strcmp(argv[i],"-m") == 0) 
-		{
-			if(argc>i) 
-			{
+		} else if(strcmp(argv[i],"-m") == 0) {
+			if(argc>i) {
 				mss_redist_dir = argv[++i];
 			}
-		} 
-		else if(strcmp(argv[i],"-c") == 0) 
-		{
+		}  else if(strcmp(argv[i],"-c") == 0) {
 			create_dir = 1;
 		} 
 	}
@@ -124,20 +115,16 @@ int main( int argc, const char* argv[])
 		return 1;
 	}
 
-	if(create_dir) 
-	{
+	if(create_dir) {
 		_splitpath_s(wad_file,NULL,0,NULL,0,basename,sizeof(basename),NULL,0);
 		sprintf_s(wad_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
-	} 
-	else 
-	{
+	} else {
 		strcpy_s(wad_out_dir, sizeof(wad_out_dir), out_dir); 
 	}
 
 	sprintf_s(dll_filename, sizeof(dll_filename), "%s\\mss32.dll", mss_redist_dir);
 	module = LoadLibrary(dll_filename);
-	if(module == NULL)
-	{
+	if(module == NULL) {
 		printf("Unable to load mss32.dll from %s\n", dll_filename);
 		return 1;
 	}

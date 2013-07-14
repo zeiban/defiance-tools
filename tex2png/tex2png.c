@@ -115,6 +115,7 @@ void Usage(void)
 	printf("-i\t Input WAD filename\n");
 	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
+	printf("-c\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
 }
 
 int main( int argc, const char* argv[])
