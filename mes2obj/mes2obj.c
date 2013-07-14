@@ -14,6 +14,9 @@
 #define MINOR_VERSION 1
 #define RELEASE_VERSION 0
 
+typedef void (* WriteVertexData)(FILE * file, void * data, uint32_t index);
+
+
 float halfToFloatI(unsigned short y) 
 { 
 	int s = (y >> 15) & 0x00000001; // sign 
@@ -25,7 +28,7 @@ float halfToFloatI(unsigned short y)
 	{ 
 		// need to handle +-0 case f==0 or f=0x8000? 
 		if (f == 0) // Plus or minus zero 
-			return s << 31; 
+			return (float)(s << 31); 
 		else { // Denormalized number -- renormalize it 
 			while (!(f & 0x00000400)) 
 			{ 
@@ -38,21 +41,51 @@ float halfToFloatI(unsigned short y)
 	else if (e == 31) 
 	{ 
 		if (f == 0) // Inf 
-			return (s << 31) | 0x7f800000; 
+			return (float)((s << 31) | 0x7f800000); 
 		else // NaN 
-			return (s << 31) | 0x7f800000 | (f << 13); 
+			return (float)((s << 31) | 0x7f800000 | (f << 13)); 
 	} 
 	
 	e = e + (127 - 15); 
 	f = f << 13; 
 	
-	return ((s << 31) | (e << 23) | f); 
+	return (float)(((s << 31) | (e << 23) | f)); 
 }
 
 float HALFToFloat(unsigned short y) { 
 	union { float f; unsigned int i; } v;
-	v.i = halfToFloatI(y); 
+	v.i = (uint32_t)halfToFloatI(y); 
 	return v.f; 
+}
+
+void WriteVertexPositon64(FILE * file, void * data, uint32_t index) {
+	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
+	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
+}
+
+void WriteVertexNormal64(FILE * file, void * data, uint32_t index) {
+	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
+	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord64(FILE * file, void * data, uint32_t index) {
+	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+}
+
+void WriteVertexPositon68(FILE * file, void * data, uint32_t index) {
+	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
+	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
+}
+
+void WriteVertexNormal68(FILE * file, void * data, uint32_t index) {
+	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
+	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord68(FILE * file, void * data, uint32_t index) {
+	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
 }
 
 unsigned int EndianSwap(unsigned int x)
@@ -113,9 +146,13 @@ int main( int argc, const char* argv[])
 	mes_material_header * material_header;
 	mes_material_param * material_params;
 	void * vertex_data;
-	mes_vertex_64 * vertex64;
-	
-		printf("WORK IN PROGRESS DOES NOT WORK!!!!\n");
+	mes_face * face_data;	
+
+	WriteVertexData wvp;
+	WriteVertexData wvn;
+	WriteVertexData wvtc;
+
+	printf("WORK IN PROGRESS DOES NOT WORK!!!!\n");
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
 	for(i=0; i<argc; i++) {
@@ -234,26 +271,61 @@ int main( int argc, const char* argv[])
 						printf(" V=%d", mesh_header->num_vertices1);
 						printf(" I=%d\n", mesh_header->num_indices1);
 
-						vertex_data = (void*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset);
-						vertex64 = (mes_vertex_64*)vertex_data;
-						for(v = 0; v < mesh_header->num_vertices1; v++) {
-							printf(" %d [%f %f %f] [%f %f %f] [%f %f]\n", 
-								sizeof(mes_vertex_64),
-								HALFToFloat(vertex64[v].position.x), HALFToFloat(vertex64[v].position.y), HALFToFloat(vertex64[v].position.z), 
-								vertex64[v].normal.x, vertex64[v].normal.y, vertex64[v].normal.z, 
-								vertex64[v].texcoord.x, vertex64[v].texcoord.y);
-						}
-						/*	
-						sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.obj",wad_out_dir,basename, m);
-						if(fopen_s(&out_file, out_filename, "wb") != 0) {
-							printf("ERROR: Unable to open file %s\n", wr->filename);
+						if(mesh_header->bytes_per_vertex == 64) {
+							wvp = WriteVertexPositon64;
+							wvn = WriteVertexNormal64;
+							wvtc = WriteVertexTexCoord64;
+
+						} else if(mesh_header->bytes_per_vertex == 68) {
+							wvp = WriteVertexPositon68;
+							wvn = WriteVertexNormal68;
+							wvtc = WriteVertexTexCoord68;
+						} else {
 							continue;
 						}
 
+						sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.obj",wad_out_dir,wr->name, m);
+						if(fopen_s(&out_file, out_filename, "w") != 0) {
+							printf("ERROR: Unable to open file %s\n", out_filename);
+							fclose(in_file);
+							continue;
+						}
+
+
+						vertex_data = (void*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset);
+						
+						// Vertices
+						fprintf(out_file, "# Vertices %d\n",mesh_header->num_vertices1);
+						for(v = 0; v < mesh_header->num_vertices1; v++) {
+							wvp(out_file, vertex_data, v);
+//							fprintf(out_file, "v %f %f %f\n", HALFToFloat(vertex64[v].position.x), HALFToFloat(vertex64[v].position.y), HALFToFloat(vertex64[v].position.z));
+						}
+
+						// Texture Coords
+						fprintf(out_file, "# Texture Coords\n",mesh_header->num_vertices1);
+						for(v = 0; v < mesh_header->num_vertices1; v++) {
+							wvtc(out_file, vertex_data, v);
+//							fprintf(out_file, "vt %f %f\n", vertex64[v].texcoord.x, vertex64[v].texcoord.y);
+						}
+
+						// Normals
+						fprintf(out_file, "# Normals\n",mesh_header->num_vertices1);
+						for(v = 0; v < mesh_header->num_vertices1; v++) {
+							wvn(out_file, vertex_data, v);
+//							fprintf(out_file, "vn %f %f\n", vertex64[v].normal.x, vertex64[v].normal.y, vertex64[v].normal.z);
+						}
+
+						// Faces
+						face_data = (mes_face *)(data + mesh_records[m].offset + mesh_header->index_data_offset);
+						fprintf(out_file, "# Faces %d\n",mesh_header->num_indices1);
+						for(i = 0; i < mesh_header->num_indices1/3; i++) {
+							fprintf(out_file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
+								face_data[i].v1+1, face_data[i].v1+1, face_data[i].v1+1,
+								face_data[i].v2+1, face_data[i].v2+1, face_data[i].v2+1,
+								face_data[i].v3+1, face_data[i].v3+1, face_data[i].v3+1);
+						}
 						fclose(out_file);
-						*/
 					}
-					RmidFree(&rf);
 					fclose(in_file);
 				}
 			}
