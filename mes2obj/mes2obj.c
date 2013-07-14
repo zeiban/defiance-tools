@@ -58,6 +58,39 @@ float HALFToFloat(unsigned short y) {
 	return v.f; 
 }
 
+// mes_vertex_52
+void WriteVertexPositon52(FILE * file, void * data, uint32_t index) {
+	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
+	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
+}
+
+void WriteVertexNormal52(FILE * file, void * data, uint32_t index) {
+	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
+	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord52(FILE * file, void * data, uint32_t index) {
+	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+}
+
+// mes_vertex_56
+void WriteVertexPositon56(FILE * file, void * data, uint32_t index) {
+	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
+	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
+}
+
+void WriteVertexNormal56(FILE * file, void * data, uint32_t index) {
+	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
+	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord56(FILE * file, void * data, uint32_t index) {
+	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+}
+
+// mes_vertex_64
 void WriteVertexPositon64(FILE * file, void * data, uint32_t index) {
 	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
 	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
@@ -73,6 +106,7 @@ void WriteVertexTexCoord64(FILE * file, void * data, uint32_t index) {
 	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
 }
 
+// mes_vertex_68
 void WriteVertexPositon68(FILE * file, void * data, uint32_t index) {
 	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
 	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
@@ -280,6 +314,14 @@ int main( int argc, const char* argv[])
 							wvp = WriteVertexPositon68;
 							wvn = WriteVertexNormal68;
 							wvtc = WriteVertexTexCoord68;
+						} else if(mesh_header->bytes_per_vertex == 52) {
+							wvp = WriteVertexPositon52;
+							wvn = WriteVertexNormal52;
+							wvtc = WriteVertexTexCoord52;
+						} else if(mesh_header->bytes_per_vertex == 56) {
+							wvp = WriteVertexPositon56;
+							wvn = WriteVertexNormal56;
+							wvtc = WriteVertexTexCoord56;
 						} else {
 							continue;
 						}
