@@ -79,12 +79,12 @@ void WriteVertexPositon28(FILE * file, void * data, uint32_t index) {
 }
 
 void WriteVertexNormal28(FILE * file, void * data, uint32_t index) {
-	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
-	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	// No normal
 }
 
 void WriteVertexTexCoord28(FILE * file, void * data, uint32_t index) {
-	// No Texcoord
+	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
 }
 
 // mes_vertex_52

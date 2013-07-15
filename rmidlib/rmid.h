@@ -399,8 +399,9 @@ typedef struct {
 } mes_face; 
 
 typedef struct {
+	uint32_t color;
 	float_3 position; 
-	float_3 normal; 
+	float_2 texcoord; 
 	uint32_t unk2; 
 
 } mes_vertex_28;
