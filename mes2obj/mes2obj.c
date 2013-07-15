@@ -15,6 +15,7 @@
 #define RELEASE_VERSION 0
 
 typedef void (* WriteVertexData)(FILE * file, void * data, uint32_t index);
+typedef void (* WriteFaceData)(FILE * file, mes_face * face);
 
 
 float halfToFloatI(unsigned short y) 
@@ -57,6 +58,34 @@ float HALFToFloat(unsigned short y) {
 	v.i = (uint32_t)halfToFloatI(y); 
 	return v.f; 
 }
+void WritePositionNormalFace(FILE * file, mes_face * face) {
+	fprintf(file, "f %d/%d %d/%d %d/%d\n", 
+		face->v1+1, face->v1+1,
+		face->v2+1, face->v2+1,
+		face->v3+1, face->v3+1);
+}
+
+void WritePositionNormalTexcoordFace(FILE * file, mes_face * face) {
+	fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
+		face->v1+1, face->v1+1, face->v1+1,
+		face->v2+1, face->v2+1, face->v2+1,
+		face->v3+1, face->v3+1, face->v3+1);
+}
+
+// mes_vertex_28
+void WriteVertexPositon28(FILE * file, void * data, uint32_t index) {
+	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
+	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
+}
+
+void WriteVertexNormal28(FILE * file, void * data, uint32_t index) {
+	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
+	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord28(FILE * file, void * data, uint32_t index) {
+	// No Texcoord
+}
 
 // mes_vertex_52
 void WriteVertexPositon52(FILE * file, void * data, uint32_t index) {
@@ -87,6 +116,22 @@ void WriteVertexNormal56(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexTexCoord56(FILE * file, void * data, uint32_t index) {
 	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+}
+
+// mes_vertex_60
+void WriteVertexPositon60(FILE * file, void * data, uint32_t index) {
+	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
+	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
+}
+
+void WriteVertexNormal60(FILE * file, void * data, uint32_t index) {
+	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
+	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord60(FILE * file, void * data, uint32_t index) {
+	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
 	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
 }
 
@@ -185,6 +230,7 @@ int main( int argc, const char* argv[])
 	WriteVertexData wvp;
 	WriteVertexData wvn;
 	WriteVertexData wvtc;
+	WriteFaceData wfd;
 
 	printf("WORK IN PROGRESS DOES NOT WORK!!!!\n");
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
@@ -305,23 +351,36 @@ int main( int argc, const char* argv[])
 						printf(" V=%d", mesh_header->num_vertices1);
 						printf(" I=%d\n", mesh_header->num_indices1);
 
-						if(mesh_header->bytes_per_vertex == 64) {
+						if(mesh_header->bytes_per_vertex == 28) {
+							wvp = WriteVertexPositon28;
+							wvn = WriteVertexNormal28;
+							wvtc = WriteVertexTexCoord28;
+							wfd = WritePositionNormalFace;
+						}  else if(mesh_header->bytes_per_vertex == 60) {
+							wvp = WriteVertexPositon60;
+							wvn = WriteVertexNormal60;
+							wvtc = WriteVertexTexCoord60;
+							wfd = WritePositionNormalTexcoordFace;
+						} else if(mesh_header->bytes_per_vertex == 64) {
 							wvp = WriteVertexPositon64;
 							wvn = WriteVertexNormal64;
 							wvtc = WriteVertexTexCoord64;
-
+							wfd = WritePositionNormalTexcoordFace;
 						} else if(mesh_header->bytes_per_vertex == 68) {
 							wvp = WriteVertexPositon68;
 							wvn = WriteVertexNormal68;
 							wvtc = WriteVertexTexCoord68;
+							wfd = WritePositionNormalTexcoordFace;
 						} else if(mesh_header->bytes_per_vertex == 52) {
 							wvp = WriteVertexPositon52;
 							wvn = WriteVertexNormal52;
 							wvtc = WriteVertexTexCoord52;
+							wfd = WritePositionNormalTexcoordFace;
 						} else if(mesh_header->bytes_per_vertex == 56) {
 							wvp = WriteVertexPositon56;
 							wvn = WriteVertexNormal56;
 							wvtc = WriteVertexTexCoord56;
+							wfd = WritePositionNormalTexcoordFace;
 						} else {
 							continue;
 						}
@@ -361,10 +420,7 @@ int main( int argc, const char* argv[])
 						face_data = (mes_face *)(data + mesh_records[m].offset + mesh_header->index_data_offset);
 						fprintf(out_file, "# Faces %d\n",mesh_header->num_indices1);
 						for(i = 0; i < mesh_header->num_indices1/3; i++) {
-							fprintf(out_file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
-								face_data[i].v1+1, face_data[i].v1+1, face_data[i].v1+1,
-								face_data[i].v2+1, face_data[i].v2+1, face_data[i].v2+1,
-								face_data[i].v3+1, face_data[i].v3+1, face_data[i].v3+1);
+							wfd(out_file, &face_data[i]);
 						}
 						fclose(out_file);
 					}
