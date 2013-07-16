@@ -396,15 +396,30 @@ typedef struct {
 	uint16_t v1;
 	uint16_t v2;
 	uint16_t v3;
-} mes_face; 
+} mes_face_16; 
 
 typedef struct {
-	uint32_t color;
+	uint32_t v1;
+	uint32_t v2;
+	uint32_t v3;
+} mes_face_32; 
+
+typedef struct {
 	float_3 position; 
+	uint32_t color;
 	float_2 texcoord; 
 	uint32_t unk2; 
 
 } mes_vertex_28;
+
+typedef struct {
+	float_3 position; 
+	uint32_t unk1;
+	float_2 texcoord; 
+	uint32_t unk2; // 0xFFFF 
+	uint32_t unk3; 
+	uint32_t unk4; 
+} mes_vertex_36;
 
 typedef struct {
 	half_float_3 position; //6
