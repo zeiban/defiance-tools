@@ -414,6 +414,13 @@ typedef struct {
 
 typedef struct {
 	float_3 position; 
+	float_3 normal; 
+	uint32_t unk1; // 0xFFFF 
+	uint32_t unk2; 
+} mes_vertex_32;
+
+typedef struct {
+	float_3 position; 
 	uint32_t unk1;
 	float_2 texcoord; 
 	uint32_t unk2; // 0xFFFF 
@@ -486,18 +493,18 @@ typedef struct {
 typedef struct {
 	float_3 position;
 	float_3 normal; 
-	float_2 texcoord;
-	uint32_t unk2;
-
+//	float_2 texcoord;
+	uint32_t unk1;
 	uint32_t unk3;
+
 	uint32_t unk4;
 	uint32_t unk5;
-	uint32_t unk6;
-
-	uint32_t unk7;
 	uint32_t unk8;
 	uint32_t unk9;
 	uint32_t unk10;
+	uint32_t unk11;
+	uint32_t unk12;
+	float_2 texcoord;
 } mes_vertex_68;
 
 typedef struct { //96 bytes

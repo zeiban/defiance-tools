@@ -18,6 +18,25 @@ typedef void (* WriteVertexData)(FILE * file, void * data, uint32_t index);
 typedef void (* WriteFaceData)(FILE * file, void * data, uint32_t index);
 
 
+int DumpFloats(uint8_t * data, uint32_t size, uint32_t count, char * filename) {
+	FILE * file;
+	uint32_t v, o;
+	float * f;
+	if(fopen_s(&file, filename, "w") != 0) {
+		printf("ERROR: Unable to open file %s\n", filename);
+		return 1;
+	}
+	for(v=0; v < count; v++) {
+		for(o = 0; o < size; o+=4) {
+			f = (float*)(data + (v * size) + o);
+			fprintf(file,"%10f ",*f);
+		}
+		fprintf(file,"\n");
+	}
+
+	fclose(file);
+	return 0;
+}
 float halfToFloatI(unsigned short y) 
 { 
 	int s = (y >> 15) & 0x00000001; // sign 
@@ -94,7 +113,23 @@ void WriteVertexNormal28(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexTexCoord28(FILE * file, void * data, uint32_t index) {
 	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+	fprintf(file, "vt %f %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+}
+
+// mes_vertex_32
+void WriteVertexPositon32(FILE * file, void * data, uint32_t index) {
+	mes_vertex_32 * vertex = (mes_vertex_32 *)data;
+	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
+}
+
+void WriteVertexNormal32(FILE * file, void * data, uint32_t index) {
+	mes_vertex_32 * vertex = (mes_vertex_32 *)data;
+	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+}
+
+void WriteVertexTexCoord32(FILE * file, void * data, uint32_t index) {
+	// No texcoord
+	fprintf(file, "vt 0.0 0.0\n");
 }
 
 // mes_vertex_36
@@ -105,6 +140,7 @@ void WriteVertexPositon36(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexNormal36(FILE * file, void * data, uint32_t index) {
 	// No normal
+	fprintf(file, "vn 0.0 0.0 0.0\n");
 }
 
 void WriteVertexTexCoord36(FILE * file, void * data, uint32_t index) {
@@ -120,7 +156,7 @@ void WriteVertexPositon52(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexNormal52(FILE * file, void * data, uint32_t index) {
 	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
-	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
 }
 
 void WriteVertexTexCoord52(FILE * file, void * data, uint32_t index) {
@@ -136,7 +172,7 @@ void WriteVertexPositon56(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexNormal56(FILE * file, void * data, uint32_t index) {
 	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
-	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
 }
 
 void WriteVertexTexCoord56(FILE * file, void * data, uint32_t index) {
@@ -152,7 +188,7 @@ void WriteVertexPositon60(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexNormal60(FILE * file, void * data, uint32_t index) {
 	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
-	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
 }
 
 void WriteVertexTexCoord60(FILE * file, void * data, uint32_t index) {
@@ -168,7 +204,7 @@ void WriteVertexPositon64(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexNormal64(FILE * file, void * data, uint32_t index) {
 	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
-	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
 }
 
 void WriteVertexTexCoord64(FILE * file, void * data, uint32_t index) {
@@ -184,7 +220,7 @@ void WriteVertexPositon68(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexNormal68(FILE * file, void * data, uint32_t index) {
 	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "vn %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
 }
 
 void WriteVertexTexCoord68(FILE * file, void * data, uint32_t index) {
@@ -220,6 +256,7 @@ int main( int argc, const char* argv[])
 	uint32_t m;
 	uint32_t v;
 	uint32_t p;
+	uint32_t idx;
 	wad_dir wd;
 
 	wad_record2 * wr;
@@ -249,6 +286,7 @@ int main( int argc, const char* argv[])
 	mes_mesh_header * mesh_header;
 	mes_material_header * material_header;
 	mes_material_param * material_params;
+	uint64_t index_data_size;
 	void * vertex_data;
 	void * face_data;
 
@@ -309,7 +347,7 @@ int main( int argc, const char* argv[])
 					printf("Failed to resolve name for ID 0x%08X\n", EndianSwap(wr->id));
 				}
 
-				if(((search_name != NULL) && (strstr(wr->name,search_name) != NULL)) || search_name == NULL) {				
+				if(((search_name != NULL) && (strstr(wr->name,search_name) != NULL)) || search_name == NULL) {
 					if(fopen_s(&in_file, wr->filename, "rb") != 0) {
 						printf("ERROR: Unable to open file %s\n", wr->filename);
 						continue;
@@ -380,6 +418,10 @@ int main( int argc, const char* argv[])
 							wvp = WriteVertexPositon28;
 							wvn = WriteVertexNormal28;
 							wvtc = WriteVertexTexCoord28;
+						}  else if(mesh_header->bytes_per_vertex == 32) {
+							wvp = WriteVertexPositon32;
+							wvn = WriteVertexNormal32;
+							wvtc = WriteVertexTexCoord32;
 						}  else if(mesh_header->bytes_per_vertex == 36) {
 							wvp = WriteVertexPositon36;
 							wvn = WriteVertexNormal36;
@@ -405,14 +447,26 @@ int main( int argc, const char* argv[])
 							wvn = WriteVertexNormal56;
 							wvtc = WriteVertexTexCoord56;
 						} else {
+							sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.verts",wad_out_dir,wr->name, m);
+							DumpFloats(
+								data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
+								mesh_header->bytes_per_vertex, 
+								mesh_header->num_vertices1,
+								out_filename);
 							continue;
 						}
+
+						index_data_size = mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset));
 						
-						if(mesh_header->num_vertices1 > 0xFFFF) {
-							wfd = WriteFace32;
-						} else {
+						if((index_data_size / 2) == mesh_header->num_indices1) {
 							wfd = WriteFace16;
+						} else {
+							wfd = WriteFace32;
 						}
+
+						
+
+
 						sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.obj",wad_out_dir,wr->name, m);
 						if(fopen_s(&out_file, out_filename, "w") != 0) {
 							printf("ERROR: Unable to open file %s\n", out_filename);
@@ -422,7 +476,6 @@ int main( int argc, const char* argv[])
 
 
 						vertex_data = (void*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset);
-						
 						// Vertices
 						fprintf(out_file, "# Vertices %d\n",mesh_header->num_vertices1);
 						for(v = 0; v < mesh_header->num_vertices1; v++) {
@@ -447,8 +500,8 @@ int main( int argc, const char* argv[])
 						// Faces
 						face_data = (void *)(data + mesh_records[m].offset + mesh_header->index_data_offset);
 						fprintf(out_file, "# Faces %d\n",mesh_header->num_indices1);
-						for(i = 0; i < mesh_header->num_indices1/3; i++) {
-							wfd(out_file, face_data, i);
+						for(idx = 0; idx < mesh_header->num_indices1/3; idx++) {
+							wfd(out_file, face_data, idx);
 						}
 						fclose(out_file);
 					}
