@@ -77,31 +77,38 @@ float HALFToFloat(unsigned short y) {
 	v.i = (uint32_t)halfToFloatI(y); 
 	return v.f; 
 }
-/*
-void WritePositionNormalFace(FILE * file, mes_face * face) {
-	fprintf(file, "f %d/%d %d/%d %d/%d\n", 
-		face->v1+1, face->v1+1,
-		face->v2+1, face->v2+1,
-		face->v3+1, face->v3+1);
-}
-*/
 
 
 void WriteFace16(FILE * file, uint32_t offset, void * data, uint32_t index) {
 	mes_face_16 * face = (mes_face_16 * ) data;
 	fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
-		offset + face[index].v1+1, offset + face[index].v1+1, offset + face[index].v1+1,
+		offset + face[index].v3+1, offset + face[index].v3+1, offset + face[index].v3+1,
 		offset + face[index].v2+1, offset + face[index].v2+1, offset + face[index].v2+1,
-		offset + face[index].v3+1, offset + face[index].v3+1, offset + face[index].v3+1);
+		offset + face[index].v1+1, offset + face[index].v1+1, offset + face[index].v1+1);
 }
 
 
 void WriteFace32(FILE * file, uint32_t offset, void * data, uint32_t index) {
 	mes_face_32 * face = (mes_face_32 * ) data;
 	fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
-		offset + face[index].v1+1, offset + face[index].v1+1, offset + face[index].v1+1,
+		offset + face[index].v3+1, offset + face[index].v3+1, offset + face[index].v3+1,
 		offset + face[index].v2+1, offset + face[index].v2+1, offset + face[index].v2+1,
-		offset + face[index].v3+1, offset + face[index].v3+1, offset + face[index].v3+1);
+		offset + face[index].v1+1, offset + face[index].v1+1, offset + face[index].v1+1);
+}
+
+// mes_vertex_12
+void WriteVertexPositon12(FILE * file, void * data, uint32_t index) {
+	mes_vertex_12 * vertex = (mes_vertex_12 *)data;
+	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
+}
+
+void WriteVertexNormal12(FILE * file, void * data, uint32_t index) {
+	mes_vertex_12 * vertex = (mes_vertex_12 *)data;
+	fprintf(file, "vn %f %f %f\n", HALFToFloat(vertex[index].normal.x), HALFToFloat(vertex[index].normal.y), HALFToFloat(vertex[index].normal.z));
+}
+
+void WriteVertexTexCoord12(FILE * file, void * data, uint32_t index) {
+	fprintf(file, "vt 0.0 0.0\n");
 }
 
 // mes_vertex_28
@@ -116,7 +123,7 @@ void WriteVertexNormal28(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexTexCoord28(FILE * file, void * data, uint32_t index) {
 	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
-	fprintf(file, "vt %f %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
 }
 
 // mes_vertex_32
@@ -185,7 +192,7 @@ void WriteVertexNormal56(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexTexCoord56(FILE * file, void * data, uint32_t index) {
 	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
-	fprintf(file, "vt %f %f\n", HALFToFloat(vertex[index].texcoord.x), HALFToFloat(vertex[index].texcoord.y));
+	fprintf(file, "vt %f %f\n", HALFToFloat(vertex[index].texcoord2.x), HALFToFloat(vertex[index].texcoord2.y));
 }
 
 // mes_vertex_60
@@ -222,18 +229,19 @@ void WriteVertexTexCoord64(FILE * file, void * data, uint32_t index) {
 
 // mes_vertex_68
 void WriteVertexPositon68(FILE * file, void * data, uint32_t index) {
+	int sz = sizeof(mes_vertex_68);
 	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
 	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
 }
 
 void WriteVertexNormal68(FILE * file, void * data, uint32_t index) {
 	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
+	fprintf(file, "vn %f %f %f\n", vertex[index].bitangent.x, vertex[index].bitangent.y, vertex[index].bitangent.z);
 }
 
 void WriteVertexTexCoord68(FILE * file, void * data, uint32_t index) {
 	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord2.x, vertex[index].texcoord2.y);
 }
 
 unsigned int EndianSwap(unsigned int x)
@@ -459,7 +467,11 @@ int main( int argc, const char* argv[])
 						printf(" V=%d", mesh_header->num_vertices1);
 						printf(" I=%d\n", mesh_header->num_indices1);
 
-						if(mesh_header->bytes_per_vertex == 28) {
+						if(mesh_header->bytes_per_vertex == 12) {
+							wvp = WriteVertexPositon12;
+							wvn = WriteVertexNormal12;
+							wvtc = WriteVertexTexCoord12;
+						} else if(mesh_header->bytes_per_vertex == 28) {
 							wvp = WriteVertexPositon28;
 							wvn = WriteVertexNormal28;
 							wvtc = WriteVertexTexCoord28;

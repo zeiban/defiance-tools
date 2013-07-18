@@ -410,6 +410,11 @@ typedef struct {
 } mes_face_32; 
 
 typedef struct {
+	half_float_3 position; 
+	half_float_3 normal; 
+} mes_vertex_12;
+
+typedef struct {
 	float_3 position; 
 	uint32_t color;
 	float_2 texcoord; 
@@ -471,47 +476,43 @@ typedef struct {
  	uint16_t unk1; 
 	float_3 normal;
 	uint32_t unk2; 
-
 	uint32_t unk3; 
 	uint32_t unk4;
 	uint32_t unk5;
 	uint32_t unk6;
 	uint32_t unk7;
-	uint32_t unk8;
-	uint32_t unk9;
-	half_float_2 texcoord;
+
+	uint32_t unk8; // 0xFFFF
+	half_float_2 texcoord1;
+	half_float_2 texcoord2;
 } mes_vertex_56;
 
+/*
+	mes_vertex_60
+	shd_p_DeferredAlphaTestDiffuseSpecularNormalEmissive
+*/
 typedef struct {
 	float_3 position; //6
 	float_3 normal; // 12
+	float_3 tangent;
+	float_3 bitangent;
+	uint32_t unk1;
 	float_2 texcoord; // 8
-
-	uint32_t unk3;
-	uint32_t unk4;
-	uint32_t unk5;
-	uint32_t unk6;
-
-	uint32_t unk7;
-	uint32_t unk8;
-	uint32_t unk9;
 } mes_vertex_60;
 
+/*
+	mes_vertex_68
+	shd_p_DeferredAlphaTestDualDiffuseSpecularNormal
+	shd_p_DeferredDualDiffuseSpecularNormal
+*/
 typedef struct {
 	float_3 position;
 	float_3 normal; 
-//	float_2 texcoord;
-	uint32_t unk1;
-	uint32_t unk3;
-
-	uint32_t unk4;
-	uint32_t unk5;
-	uint32_t unk8;
-	uint32_t unk9;
-	uint32_t unk10;
-	uint32_t unk11;
+	float_3 tangent;
+	float_3 bitangent;
 	uint32_t unk12;
-	float_2 texcoord;
+	float_2 texcoord1;
+	float_2 texcoord2;
 } mes_vertex_68;
 
 typedef struct { //96 bytes
@@ -779,6 +780,10 @@ typedef struct {
 	unsigned long long unk_offset6;
 	unsigned long long unk_offset7;
 } act_header;
+
+typedef struct {
+	uint32_t unk1;
+} shd_header;
 
 typedef struct {
 	unsigned long long data_offset;
