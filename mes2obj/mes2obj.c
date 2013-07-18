@@ -439,15 +439,16 @@ int main( int argc, const char* argv[])
 
 					printf("Meshes\n");
 
-						sprintf_s(out_filename, sizeof(out_filename),"%s\\%s.obj",wad_out_dir,wr->name);
-						if(fopen_s(&out_file, out_filename, "w") != 0) {
-							printf("ERROR: Unable to open file %s\n", out_filename);
-							fclose(in_file);
-							continue;
-						}
-						fprintf(out_file, "# Generated with mes2obj\n");
-						fprintf(out_file, "mtllib %s.mtl\n", wr->name);
+					sprintf_s(out_filename, sizeof(out_filename),"%s\\%s.obj",wad_out_dir,wr->name);
+					if(fopen_s(&out_file, out_filename, "w") != 0) {
+						printf("ERROR: Unable to open file %s\n", out_filename);
+						fclose(in_file);
+						continue;
+					}
+					fprintf(out_file, "# Generated with mes2obj\n");
+					fprintf(out_file, "mtllib %s.mtl\n", wr->name);
 
+					offset = 0;
 					for(m = 0;  m < *total_meshes; m++) {
 						mesh_header = (mes_mesh_header*)(data + mesh_records[m].offset);	
 
@@ -493,12 +494,12 @@ int main( int argc, const char* argv[])
 						} else {
 							continue;
 						}
-							sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.verts",wad_out_dir,wr->name, m);
-							DumpFloats(
-								data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
-								mesh_header->bytes_per_vertex, 
-								mesh_header->num_vertices1,
-								out_filename);
+						sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.verts",wad_out_dir,wr->name, m);
+						DumpFloats(
+							data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
+							mesh_header->bytes_per_vertex, 
+							mesh_header->num_vertices1,
+							out_filename);
 
 						index_data_size = mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset));
 						
