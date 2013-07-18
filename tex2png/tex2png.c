@@ -18,8 +18,7 @@
 #define MINOR_VERSION 1
 #define RELEASE_VERSION 0
 
-int PngWriteToFile(FILE * file, uint32_t bits_per_pixel, uint32_t width, uint32_t height, uint8_t * image)
-{
+int PngWriteToFile(FILE * file, uint32_t bits_per_pixel, uint32_t width, uint32_t height, uint8_t * image) {
 	png_byte color_type = PNG_COLOR_TYPE_RGBA;
 	png_byte bit_depth;
 	png_structp png_ptr;

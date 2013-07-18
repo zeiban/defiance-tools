@@ -14,20 +14,22 @@ typedef struct
 
 typedef struct 
 {
-	unsigned int id; // Asset ID
-	unsigned int type; // Asset type
+	uint32_t id; // Asset ID
+	uint32_t type; // Asset type
 } rmid_reference;
 
 typedef struct
 {
 	rmid_header * header;
-	int size;
+	uint64_t size;
 	void * data;
 	rmid_reference * references; 
 } rmid_file;
 
-int RmidLoad(FILE * file, long size, rmid_file * rf);
+int RmidLoad(FILE * file, uint64_t size, rmid_file * rf);
 int RmidWriteToFile(rmid_file * rf, FILE * file);
 void RmidFree(rmid_file * rf);
 
+int RmidLoadFromFile(const char * filename, uint64_t offset, uint64_t size, rmid_file * rf);
+int RmidWriteTexToPng(rmid_file * rf,  const char * dir, const char * name);
 #endif //_RMIDLIB_H_

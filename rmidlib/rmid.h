@@ -26,7 +26,7 @@
 #define RMID_TYPE_CON	0x0016 // Container
 #define RMID_TYPE_LIP	0x0023 
 
-#define RMID_MAT_PARAM_COLOR1	0xCE454C77 // Color Texture 1
+#define RMID_MAT_PARAM_COLOR1	0x774C45CE // Color Texture 1
 #define RMID_MAT_PARAM_UNK2		0xA9AA497A // V=0x00000000
 #define RMID_MAT_PARAM_COLOR2	0x9CB8070C // Color Texture 2
 #define RMID_MAT_PARAM_UNK4		0xAD54B293 // V=0x00000000
@@ -389,6 +389,11 @@ typedef struct {
 typedef struct {
 	uint16_t x;
 	uint16_t y;
+} half_float_2;
+
+typedef struct {
+	uint16_t x;
+	uint16_t y;
 	uint16_t z;
 } half_float_3;
 
@@ -450,29 +455,31 @@ typedef struct {
 	half_float_3 position; //6
  	uint16_t unk1; //2
 	float_3 normal; // 12
-	float_2 texcoord; // 8
 	uint32_t unk2; // 4
 
 	uint32_t unk3;
 	uint32_t unk4;
 	uint32_t unk5;
 	uint32_t unk6;
-
 	uint32_t unk7;
+	uint32_t unk8;
+	half_float_2 texcoord; // 8
 } mes_vertex_52;
 
 typedef struct {
-	float_3 position; //6
-	float_3 normal; // 12
-	float_2 texcoord; // 8
-	uint32_t unk2; // 4
+	half_float_3 position;
+ 	uint16_t unk1; 
+	float_3 normal;
+	uint32_t unk2; 
 
-	uint32_t unk3;
+	uint32_t unk3; 
 	uint32_t unk4;
 	uint32_t unk5;
 	uint32_t unk6;
-
 	uint32_t unk7;
+	uint32_t unk8;
+	uint32_t unk9;
+	half_float_2 texcoord;
 } mes_vertex_56;
 
 typedef struct {
