@@ -530,13 +530,14 @@ int main( int argc, const char* argv[])
 						}
 							material_header = (mes_material_header *)(data + material_records[m].offset);
 							swr = WadDirFindByID(&wd, material_header->shader_id);
+							/*
 							sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%s-%d.verts",wad_out_dir,wr->name, swr->name, m);
 							DumpFloats(
 								data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
 								mesh_header->bytes_per_vertex, 
 								mesh_header->num_vertices1,
 								out_filename);
-
+								*/
 						index_data_size = mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset));
 						
 						if((index_data_size / 2) == mesh_header->num_indices1) {
