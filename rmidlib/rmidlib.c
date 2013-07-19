@@ -342,8 +342,9 @@ static int PngWriteToFile(FILE * file, uint32_t bits_per_pixel, uint32_t width, 
 
 	row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
 
-	for(y=0; y<height; y++) {
-		row_pointers[y] = image + (y * width * bytes_per_pixel);
+	// Invert Y for textures
+	for(y=0; y < height; y++) {
+		row_pointers[y] = image + ((height-y-1) * width * bytes_per_pixel);
 	}
 	
 	png_write_image(png_ptr, row_pointers);
