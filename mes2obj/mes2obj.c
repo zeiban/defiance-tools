@@ -17,6 +17,29 @@
 typedef void (* WriteVertexData)(FILE * file, void * data, uint32_t index);
 typedef void (* WriteFaceData)(FILE * file, uint32_t offset, void * data, uint32_t index);
 
+typedef struct {
+	uint32_t type;
+	uint32_t size;
+} vertex_element;
+
+/*
+#define FLOAT2 1
+#define HALFFLOAT2 2
+#define FLOAT3 3
+#define HALFFLOAT3 4
+
+typedef struct {
+	char * name;
+	vertex_element position;
+	vertex_element normal;
+	vertex_element texcoord;
+ } vertex_format; 
+
+vertex_format formats [] = {
+	{"shd_p_DeferredDualDiffuseSpecularNormal", {0,FLOAT3},{12,FLOAT3},{24,FLOAT2}},
+	{"shd_p_DeferredDualDiffuseSpecularDualNormal", {0,FLOAT3},{12,FLOAT3},{24,FLOAT2}}
+};
+*/
 
 int DumpFloats(uint8_t * data, uint32_t size, uint32_t count, char * filename) {
 	FILE * file;
@@ -118,7 +141,7 @@ void WriteVertexPositon28(FILE * file, void * data, uint32_t index) {
 }
 
 void WriteVertexNormal28(FILE * file, void * data, uint32_t index) {
-	// No normal
+	fprintf(file, "vn 0.0 0.0 0.0\n");
 }
 
 void WriteVertexTexCoord28(FILE * file, void * data, uint32_t index) {
@@ -224,7 +247,7 @@ void WriteVertexNormal64(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexTexCoord64(FILE * file, void * data, uint32_t index) {
 	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord1.x, vertex[index].texcoord1.y);
 }
 
 // mes_vertex_68
@@ -241,7 +264,7 @@ void WriteVertexNormal68(FILE * file, void * data, uint32_t index) {
 
 void WriteVertexTexCoord68(FILE * file, void * data, uint32_t index) {
 	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord2.x, vertex[index].texcoord2.y);
+	fprintf(file, "vt %f %f\n", vertex[index].texcoord1.x, vertex[index].texcoord1.y);
 }
 
 unsigned int EndianSwap(unsigned int x)
@@ -313,7 +336,6 @@ int main( int argc, const char* argv[])
 	WriteVertexData wvtc;
 	WriteFaceData wfd;
 
-	printf("WORK IN PROGRESS DOES NOT WORK!!!!\n");
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
 
 	for(i=0; i<argc; i++) {
@@ -506,12 +528,14 @@ int main( int argc, const char* argv[])
 						} else {
 							continue;
 						}
-						sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%d.verts",wad_out_dir,wr->name, m);
-						DumpFloats(
-							data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
-							mesh_header->bytes_per_vertex, 
-							mesh_header->num_vertices1,
-							out_filename);
+							material_header = (mes_material_header *)(data + material_records[m].offset);
+							swr = WadDirFindByID(&wd, material_header->shader_id);
+							sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%s-%d.verts",wad_out_dir,wr->name, swr->name, m);
+							DumpFloats(
+								data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
+								mesh_header->bytes_per_vertex, 
+								mesh_header->num_vertices1,
+								out_filename);
 
 						index_data_size = mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset));
 						

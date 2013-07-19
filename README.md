@@ -2,7 +2,6 @@
 ==============
 
 ## Overview ##
-
 These are a series of tools to extract various assets from the PC version of Defiance. If you are just curious about the WAD archive and it's internal RMID asset formats take a look in the wadlib/wadf.h and rmidlib/rmid.h files. The code is quite a mess while I figure out the formats dispite rewriting everything several times. 
 
 ## Compiling ##
@@ -22,7 +21,7 @@ Used to extract and convert audio (Type 9) assets to playable WAV files.
 Used to extract and convert textures (Type 3) assets to viewable PNG files. Only the largest mipmap is extracted.
 
 ### mes2obj ###
-THIS IS A WORK IN PROGRESS AND DOES NOT WORK YET
+WORKS WITH MOST BUT NOT ALL MESHES
 Used to extract and convert static meshes (Type 4) and related texture assets to OBJ, MTL & PNG files. 
   
 ## Libraries ##

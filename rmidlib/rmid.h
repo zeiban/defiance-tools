@@ -438,23 +438,6 @@ typedef struct {
 	uint32_t unk4; 
 } mes_vertex_36;
 
-typedef struct {
-	half_float_3 position; //6
- 	uint16_t unk1; //2
-	float_3 normal; // 12
-	float_2 texcoord; // 8
-	uint32_t unk2; // 4
-
-	uint32_t unk3;
-	uint32_t unk4;
-	uint32_t unk5;
-	uint32_t unk6;
-
-	uint32_t unk7;
-	uint32_t unk8;
-	uint32_t unk9;
-	uint32_t unk10;
-} mes_vertex_64;
 
 typedef struct {
 	half_float_3 position; //6
@@ -501,6 +484,37 @@ typedef struct {
 } mes_vertex_60;
 
 /*
+	mes_vertex_64
+	shd_p_DeferredDualDiffuseSpecularNormalEmissive
+*/
+typedef struct {
+	half_float_3 position; //6
+ 	uint16_t unk1; //2
+	float_3 normal; // 12
+	float_3 tangent;
+	float_3 bitangent;
+	uint32_t unk6;
+	float_2 texcoord1; // 8
+	float_2 texcoord2; // 8
+} mes_vertex_64;
+
+/*
+	mes_vertex_68
+	shd_p_DeferredDualDiffuseSpecularDualNormal
+*/
+typedef struct {
+	float_3 position;
+	half_float_3 normal1; 
+	half_float_3 tangent1;
+	half_float_3 bitangent1;
+	half_float_3 normal2; 
+	half_float_3 tangent2;
+	half_float_3 bitangent2;
+	uint32_t unk12;
+	float_2 texcoord1;
+	float_2 texcoord2;
+} mes_vertex_68_b;
+/*
 	mes_vertex_68
 	shd_p_DeferredAlphaTestDualDiffuseSpecularNormal
 	shd_p_DeferredDualDiffuseSpecularNormal
@@ -515,6 +529,19 @@ typedef struct {
 	float_2 texcoord2;
 } mes_vertex_68;
 
+/*
+	shd_p_DeferredDualDiffuseDualSpecularNormal
+*/
+/*typedef struct {
+	float_3 position;
+	float_3 normal; 
+	float_3 tangent;
+	float_3 bitangent;
+	uint32_t unk12;
+	float_2 texcoord1;
+	float_2 texcoord2;
+} mes_vertex_68_b;
+*/
 typedef struct { //96 bytes
 	uint32_t unk1;
 	uint32_t unk2;
