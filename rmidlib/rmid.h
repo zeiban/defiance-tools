@@ -289,6 +289,8 @@ typedef struct {
 	uint64_t offset;
 	uint64_t size;
 } mes_mesh_record;
+
+#pragma pack(push, 1)
 typedef struct {
 	uint32_t	unk1;	
 	uint32_t	unk2;	
@@ -315,8 +317,11 @@ typedef struct {
 	uint32_t	unk19;	
 	uint32_t	unk20;	
 
-	uint32_t	unk21;	
-	uint32_t	unk22;	
+	uint16_t	vertex_format;	
+	uint8_t		uncompressed_texcoord_flags;
+	uint16_t	unk21;	
+	uint8_t		compressed_texcoord_flags;
+	uint16_t	unk22;	
 	uint32_t	nuk23;	
 	uint32_t	unk24;	
 
@@ -362,6 +367,7 @@ typedef struct {
 	uint32_t	unk59;	
 	uint32_t	unk60;	
 } mes_mesh_header;
+#pragma pack(pop)
 
 typedef struct {
 	uint32_t	unk1; // Always 3	

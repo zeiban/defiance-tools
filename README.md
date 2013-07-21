@@ -21,7 +21,6 @@ Used to extract and convert audio (Type 9) assets to playable WAV files.
 Used to extract and convert textures (Type 3) assets to viewable PNG files. Only the largest mipmap is extracted.
 
 ### mes2obj ###
-WORKS WITH MOST BUT NOT ALL MESHES
 Used to extract and convert static meshes (Type 4) and related texture assets to OBJ, MTL & PNG files. 
   
 ## Libraries ##

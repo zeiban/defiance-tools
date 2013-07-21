@@ -12,34 +12,46 @@
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
-#define RELEASE_VERSION 0
+#define RELEASE_VERSION 1
 
 typedef void (* WriteVertexData)(FILE * file, void * data, uint32_t index);
 typedef void (* WriteFaceData)(FILE * file, uint32_t offset, void * data, uint32_t index);
 
-typedef struct {
-	uint32_t type;
-	uint32_t size;
-} vertex_element;
 
-/*
-#define FLOAT2 1
-#define HALFFLOAT2 2
-#define FLOAT3 3
-#define HALFFLOAT3 4
+#define UNCOMPRESSED		0x01 // Vertex position is uncompressed 12 bytes otherwise compressed 8 bytes
+#define UNK_2				0x02
+#define UNK 3				0x04
+#define NORMAL				0x08 // Vertex has normals
+#define TANGENT				0x10 // Vertex has tangent
+#define BITANGENT			0x20 // Vertex has Bitangent
+#define UNKNOWN				0x40 // Unknown 4 bytes in vertex
+#define BIT_8				0x80
 
-typedef struct {
-	char * name;
-	vertex_element position;
-	vertex_element normal;
-	vertex_element texcoord;
- } vertex_format; 
+#define UNCOMPRESSED_TEXCOORD_1	0x01 // Vertex texcoord1 is uncompressed
+#define UNCOMPRESSED_TEXCOORD_2	0x04 // Vertex texcoord2 is uncompressed
+#define COMPRESSED_TEXCOORD_1	0x01 // Vertex texcoord1 is compressed
+#define COMPRESSED_TEXCOORD_2	0x02 // Vertex texcoord2 is compressed
 
-vertex_format formats [] = {
-	{"shd_p_DeferredDualDiffuseSpecularNormal", {0,FLOAT3},{12,FLOAT3},{24,FLOAT2}},
-	{"shd_p_DeferredDualDiffuseSpecularDualNormal", {0,FLOAT3},{12,FLOAT3},{24,FLOAT2}}
-};
-*/
+void PrintBits8(FILE * file, uint8_t bits) {
+	int i;
+	for(i=0; i<8; i++) {
+		if (bits & 1)
+			fprintf(file, "1");
+		else
+			fprintf(file, "0");
+		bits >>= 1;
+	}
+}
+void PrintBits16(FILE * file, uint16_t bits) {
+	int i;
+	for(i=0; i<16; i++) {
+		if (bits & 1)
+			fprintf(file, "1");
+		else
+			fprintf(file, "0");
+		bits >>= 1;
+	}
+}
 
 int DumpFloats(uint8_t * data, uint32_t size, uint32_t count, char * filename) {
 	FILE * file;
@@ -60,6 +72,7 @@ int DumpFloats(uint8_t * data, uint32_t size, uint32_t count, char * filename) {
 	fclose(file);
 	return 0;
 }
+
 float halfToFloatI(unsigned short y) 
 { 
 	int s = (y >> 15) & 0x00000001; // sign 
@@ -101,7 +114,94 @@ float HALFToFloat(unsigned short y) {
 	return v.f; 
 }
 
+void ObjWritePosition(FILE * file, uint16_t format, uint8_t * vertex_data) {
+	float x, y, z;
+	if(format & UNCOMPRESSED) {
+		x = 	*(float*)(vertex_data);
+		y = 	*(float*)(vertex_data + 4);
+		z = 	*(float*)(vertex_data + 8);
+	} else {
+		x = 	HALFToFloat(*(uint16_t*)(vertex_data));
+		y = 	HALFToFloat(*(uint16_t*)(vertex_data + 2));
+		z = 	HALFToFloat(*(uint16_t*)(vertex_data + 4));
+	}
 
+	fprintf(file, "v %f %f %f\n", x, y, z);
+
+}
+
+void ObjWriteNormal(FILE * file, mes_mesh_header * mh, uint8_t * vertex_data) {
+	float x, y, z;
+	if(mh->vertex_format & NORMAL) {
+		if(mh->vertex_format & UNCOMPRESSED) {
+			vertex_data += 12;
+		} else {
+			vertex_data += 8;
+		}
+		x = 	*(float*)(vertex_data);
+		y = 	*(float*)(vertex_data + 4);
+		z = 	*(float*)(vertex_data + 8);
+	} else {
+		x = 0.0;
+		y = 0.0;
+		z = 0.0;
+	}
+
+	fprintf(file, "vn %f %f %f\n", x, y, z);
+
+}
+
+void ObjWriteTexCoord(FILE * file, mes_mesh_header * mh, uint8_t * vertex_data) {
+	uint32_t offset = 0;
+	float u, v;
+
+	if(mh->vertex_format & UNCOMPRESSED) {
+		offset += 12; 
+	} else {
+		offset += 8; 
+	}
+	if(mh->vertex_format & NORMAL) {
+		offset += 12; 
+	}
+	if(mh->vertex_format & TANGENT) {
+		offset += 12; 
+	}
+	if(mh->vertex_format & BITANGENT) {
+		offset += 12; 
+	}
+	if(mh->vertex_format & UNKNOWN) {
+		offset += 4; 
+	}
+
+	if(mh->uncompressed_texcoord_flags & UNCOMPRESSED_TEXCOORD_1) {
+		u = 	*(float*)(vertex_data + offset);
+		v = 	*(float*)(vertex_data + offset + 4);
+		/* OBJ doesn't support more than 1 texcoord;
+		offset += 8;
+		if(mh->uncompressed_texcoord_flags & UNCOMPRESSED_TEXCOORD_2) {
+			u = 	*(float*)(vertex_data + offset);
+			v = 	*(float*)(vertex_data + offset + 4);
+		} 
+		*/
+	} else if(mh->compressed_texcoord_flags & COMPRESSED_TEXCOORD_1) {
+		u = 	HALFToFloat(*(uint16_t *) (vertex_data + offset));
+		v = 	HALFToFloat(*(uint16_t *) (vertex_data + offset + 2));
+		/* OBJ doesn't support more than 1 texcoord;
+		offset += 4;
+			
+		if(mh->compressed_texcoord_flags & UNCOMPRESSED_TEXCOORD_2) {
+			u = 	HALFToFloat(*(uint16_t *) (vertex_data + offset));
+			v = 	HALFToFloat(*(uint16_t *) (vertex_data + offset + 2));
+		} 
+		*/
+	} else {
+		u = 0.0;
+		v = 0.0;
+	}
+
+	fprintf(file, "vt %f %f\n", u, v);
+
+}
 void WriteFace16(FILE * file, uint32_t offset, void * data, uint32_t index) {
 	mes_face_16 * face = (mes_face_16 * ) data;
 	fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", 
@@ -119,154 +219,6 @@ void WriteFace32(FILE * file, uint32_t offset, void * data, uint32_t index) {
 		offset + face[index].v1+1, offset + face[index].v1+1, offset + face[index].v1+1);
 }
 
-// mes_vertex_12
-void WriteVertexPositon12(FILE * file, void * data, uint32_t index) {
-	mes_vertex_12 * vertex = (mes_vertex_12 *)data;
-	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
-}
-
-void WriteVertexNormal12(FILE * file, void * data, uint32_t index) {
-	mes_vertex_12 * vertex = (mes_vertex_12 *)data;
-	fprintf(file, "vn %f %f %f\n", HALFToFloat(vertex[index].normal.x), HALFToFloat(vertex[index].normal.y), HALFToFloat(vertex[index].normal.z));
-}
-
-void WriteVertexTexCoord12(FILE * file, void * data, uint32_t index) {
-	fprintf(file, "vt 0.0 0.0\n");
-}
-
-// mes_vertex_28
-void WriteVertexPositon28(FILE * file, void * data, uint32_t index) {
-	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
-	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
-}
-
-void WriteVertexNormal28(FILE * file, void * data, uint32_t index) {
-	fprintf(file, "vn 0.0 0.0 0.0\n");
-}
-
-void WriteVertexTexCoord28(FILE * file, void * data, uint32_t index) {
-	mes_vertex_28 * vertex = (mes_vertex_28 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
-}
-
-// mes_vertex_32
-void WriteVertexPositon32(FILE * file, void * data, uint32_t index) {
-	mes_vertex_32 * vertex = (mes_vertex_32 *)data;
-	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
-}
-
-void WriteVertexNormal32(FILE * file, void * data, uint32_t index) {
-	mes_vertex_32 * vertex = (mes_vertex_32 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
-}
-
-void WriteVertexTexCoord32(FILE * file, void * data, uint32_t index) {
-	// No texcoord
-	fprintf(file, "vt 0.0 0.0\n");
-}
-
-// mes_vertex_36
-void WriteVertexPositon36(FILE * file, void * data, uint32_t index) {
-	mes_vertex_36 * vertex = (mes_vertex_36 *)data;
-	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
-}
-
-void WriteVertexNormal36(FILE * file, void * data, uint32_t index) {
-	// No normal
-	fprintf(file, "vn 0.0 0.0 0.0\n");
-}
-
-void WriteVertexTexCoord36(FILE * file, void * data, uint32_t index) {
-	mes_vertex_36 * vertex = (mes_vertex_36 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
-}
-
-// mes_vertex_52
-void WriteVertexPositon52(FILE * file, void * data, uint32_t index) {
-	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
-	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
-}
-
-void WriteVertexNormal52(FILE * file, void * data, uint32_t index) {
-	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
-}
-
-void WriteVertexTexCoord52(FILE * file, void * data, uint32_t index) {
-	mes_vertex_52 * vertex = (mes_vertex_52 *)data;
-	fprintf(file, "vt %f %f\n", HALFToFloat(vertex[index].texcoord.x), HALFToFloat(vertex[index].texcoord.y));
-}
-
-// mes_vertex_56
-void WriteVertexPositon56(FILE * file, void * data, uint32_t index) {
-	float x, y, z;
-	int sz = sizeof(mes_vertex_56);
-	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
-	x = HALFToFloat(vertex[index].position.x);
-	y = HALFToFloat(vertex[index].position.y);
-	z = HALFToFloat(vertex[index].position.z);
-	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
-}
-
-void WriteVertexNormal56(FILE * file, void * data, uint32_t index) {
-	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
-}
-
-void WriteVertexTexCoord56(FILE * file, void * data, uint32_t index) {
-	mes_vertex_56 * vertex = (mes_vertex_56 *)data;
-	fprintf(file, "vt %f %f\n", HALFToFloat(vertex[index].texcoord2.x), HALFToFloat(vertex[index].texcoord2.y));
-}
-
-// mes_vertex_60
-void WriteVertexPositon60(FILE * file, void * data, uint32_t index) {
-	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
-	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
-}
-
-void WriteVertexNormal60(FILE * file, void * data, uint32_t index) {
-	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
-}
-
-void WriteVertexTexCoord60(FILE * file, void * data, uint32_t index) {
-	mes_vertex_60 * vertex = (mes_vertex_60 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord.x, vertex[index].texcoord.y);
-}
-
-// mes_vertex_64
-void WriteVertexPositon64(FILE * file, void * data, uint32_t index) {
-	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
-	fprintf(file, "v %f %f %f\n", HALFToFloat(vertex[index].position.x), HALFToFloat(vertex[index].position.y), HALFToFloat(vertex[index].position.z));
-}
-
-void WriteVertexNormal64(FILE * file, void * data, uint32_t index) {
-	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].normal.x, vertex[index].normal.y, vertex[index].normal.z);
-}
-
-void WriteVertexTexCoord64(FILE * file, void * data, uint32_t index) {
-	mes_vertex_64 * vertex = (mes_vertex_64 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord1.x, vertex[index].texcoord1.y);
-}
-
-// mes_vertex_68
-void WriteVertexPositon68(FILE * file, void * data, uint32_t index) {
-	int sz = sizeof(mes_vertex_68);
-	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "v %f %f %f\n", vertex[index].position.x, vertex[index].position.y, vertex[index].position.z);
-}
-
-void WriteVertexNormal68(FILE * file, void * data, uint32_t index) {
-	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "vn %f %f %f\n", vertex[index].bitangent.x, vertex[index].bitangent.y, vertex[index].bitangent.z);
-}
-
-void WriteVertexTexCoord68(FILE * file, void * data, uint32_t index) {
-	mes_vertex_68 * vertex = (mes_vertex_68 *)data;
-	fprintf(file, "vt %f %f\n", vertex[index].texcoord1.x, vertex[index].texcoord1.y);
-}
-
 unsigned int EndianSwap(unsigned int x)
 {
     return (x>>24) | 
@@ -279,12 +231,14 @@ unsigned int EndianSwap(unsigned int x)
 
 void Usage(void)
 {
-	printf("Usage mes2obj.exe  [-w <wad_dir>] [-s <search_name>] [-o <output_dir>]\n");
+	printf("Usage mes2obj.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-c] [-f] [-v]\n");
 	printf("Extracts Defiance meshes and converts them to OBJ files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
-	printf("-c\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
+	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
+	printf("-n\t (Optional) Creates a sub directory under the <output_dir> with the name mesh\n");
+	printf("-v\t (Optional) Verbose output. Outputs more information than you proably want to know.\n");
 }
 
 int main( int argc, const char* argv[])
@@ -302,6 +256,8 @@ int main( int argc, const char* argv[])
 	wad_record2 * twr;
 	wad_record2 * swr;
 
+	FILE * log;
+
 	rmid_file rf;
 	FILE * in_file;
 	FILE * out_file;
@@ -313,7 +269,9 @@ int main( int argc, const char* argv[])
 	const char * out_dir = NULL;
 	const char * search_name = NULL;
 	char wad_out_dir[256];
-	uint32_t create_dir = 0;
+	uint32_t create_wad_dir = 0;
+	uint32_t create_name_dir = 0;
+	uint32_t verbose_output = 0;
 	char basename[256];
 
 	uint8_t * data;
@@ -327,13 +285,10 @@ int main( int argc, const char* argv[])
 	mes_material_param * material_params;
 	uint64_t index_data_size;
 	void * vertex_data;
+	uint8_t * vertex_byte_data;
 	void * face_data;
 	rmid_file trf;
 	uint32_t offset = 0;
-
-	WriteVertexData wvp;
-	WriteVertexData wvn;
-	WriteVertexData wvtc;
 	WriteFaceData wfd;
 
 	printf("Defiance Mesh Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
@@ -351,13 +306,17 @@ int main( int argc, const char* argv[])
 			if(argc>i) {
 				search_name = argv[++i];
 			}
-		}  else if(strcmp(argv[i],"-c") == 0) {
-			create_dir = 1;
+		}  else if(strcmp(argv[i],"-f") == 0) {
+			create_wad_dir = 1;
+		}  else if(strcmp(argv[i],"-n") == 0) {
+			create_name_dir = 1;
+		}  else if(strcmp(argv[i],"-v") == 0) {
+			verbose_output = 1;
 		} 
 	}
 	
 	if(wad_dir == NULL) {
-		printf("-i required\n");
+		printf("-w required\n");
 		Usage();
 		return 1;
 	}
@@ -373,12 +332,14 @@ int main( int argc, const char* argv[])
 
 	printf("Output directory: %s\n", out_dir);
 
-	printf("Loading WAD files\n");
+	printf("Loading WAD files");
 	if(WadDirLoad(&wd, wad_dir) != 0) {
-		printf("Failed to open WAD files in %s", wad_dir);
+		printf(" Failed to open WAD files in %s", wad_dir);
 		return;
 	}
-	printf("%d files loaded\n",wd.total_files);
+
+	printf(" %d files loaded\n",wd.total_files);
+
 	for(f = 0; f < wd.total_files; f++) {
 		for(r = 0; r < wd.files[f].total_records; r++) {
 			wr = &wd.files[f].records[r];
@@ -433,6 +394,7 @@ int main( int argc, const char* argv[])
 
 					for(m = 0;  m < mh->total_materials; m++) {
 						material_header = (mes_material_header *)(data + material_records[m].offset);	
+						mesh_header = (mes_mesh_header*)(data + mesh_records[m].offset);
 						swr = WadDirFindByID(&wd, material_header->shader_id);
 						if(swr == NULL) {
 							printf("Unable to find shader ID 0x%08X", EndianSwap(material_header->shader_id));
@@ -441,7 +403,7 @@ int main( int argc, const char* argv[])
 						WadRecordResolveName(swr);
 						printf(" Shader %s\n", swr->name);
 
-						fprintf(out_file, "newmtl %s_%d\n", swr->name, m);
+						fprintf(out_file, "newmtl %s_%d_%d\n", swr->name, mesh_header->bytes_per_vertex, m);
 						fprintf(out_file, "Ka 1.000 1.000 1.000\n");
 						fprintf(out_file, "Kd 1.000 1.000 1.000\n");
 						fprintf(out_file, "Ks 0.000 0.000 0.000\n");
@@ -481,63 +443,66 @@ int main( int argc, const char* argv[])
 					offset = 0;
 					for(m = 0;  m < *total_meshes; m++) {
 						mesh_header = (mes_mesh_header*)(data + mesh_records[m].offset);	
-
-
+						
+						remove("c:\\temp\\mes2obj3.log");
+						fopen_s(&log, "c:\\temp\\mes2obj3.log", "a");
+						for(i=0; i<16; i++) {
+							fprintf(log,"%02X ",*((uint8_t*)(&mesh_header->vertex_format) + i));
+						}
+						
+						PrintBits16(log, mesh_header->vertex_format);
+						fprintf(log, " ");
+						PrintBits8(log, mesh_header->uncompressed_texcoord_flags);
+						fprintf(log, " ");
+						PrintBits8(log, mesh_header->compressed_texcoord_flags);
+						fprintf(log, " ");
+						fprintf(log,"%2d ",mesh_header->bytes_per_vertex);
+						i = 0;
+						/*
+						if(mesh_header->vertex_format & UNCOMPRESSED) {
+							i += 12; 
+						} else {
+							i += 8; 
+						}
+						if(mesh_header->vertex_format & NORMAL) {
+							i += 12; 
+						}
+						if(mesh_header->vertex_format & TANGENT) {
+							i += 12; 
+						}
+						if(mesh_header->vertex_format & BITANGENT) {
+							i += 12; 
+						}
+						if(mesh_header->vertex_format & UNKNOWN) {
+//							i += 4; 
+						}
+						*/
+						for(;i < mesh_header->bytes_per_vertex; i+=4) {
+							fprintf(log,"%15f ",*(float*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset + i));
+						}
+						
+						fprintf(log, "%s %s\n",swr->name, wr->name);
+						fclose(log);
+						
 						printf(" [%d] O=%d", m, mesh_records[m].offset);
 						printf(" S=%d", mesh_records[m].size);
 						printf(" BPV=%d", mesh_header->bytes_per_vertex);
 						printf(" V=%d", mesh_header->num_vertices1);
 						printf(" I=%d\n", mesh_header->num_indices1);
 
-						if(mesh_header->bytes_per_vertex == 12) {
-							wvp = WriteVertexPositon12;
-							wvn = WriteVertexNormal12;
-							wvtc = WriteVertexTexCoord12;
-						} else if(mesh_header->bytes_per_vertex == 28) {
-							wvp = WriteVertexPositon28;
-							wvn = WriteVertexNormal28;
-							wvtc = WriteVertexTexCoord28;
-						}  else if(mesh_header->bytes_per_vertex == 32) {
-							wvp = WriteVertexPositon32;
-							wvn = WriteVertexNormal32;
-							wvtc = WriteVertexTexCoord32;
-						}  else if(mesh_header->bytes_per_vertex == 36) {
-							wvp = WriteVertexPositon36;
-							wvn = WriteVertexNormal36;
-							wvtc = WriteVertexTexCoord36;
-						}  else if(mesh_header->bytes_per_vertex == 60) {
-							wvp = WriteVertexPositon60;
-							wvn = WriteVertexNormal60;
-							wvtc = WriteVertexTexCoord60;
-						} else if(mesh_header->bytes_per_vertex == 64) {
-							wvp = WriteVertexPositon64;
-							wvn = WriteVertexNormal64;
-							wvtc = WriteVertexTexCoord64;
-						} else if(mesh_header->bytes_per_vertex == 68) {
-							wvp = WriteVertexPositon68;
-							wvn = WriteVertexNormal68;
-							wvtc = WriteVertexTexCoord68;
-						} else if(mesh_header->bytes_per_vertex == 52) {
-							wvp = WriteVertexPositon52;
-							wvn = WriteVertexNormal52;
-							wvtc = WriteVertexTexCoord52;
-						} else if(mesh_header->bytes_per_vertex == 56) {
-							wvp = WriteVertexPositon56;
-							wvn = WriteVertexNormal56;
-							wvtc = WriteVertexTexCoord56;
-						} else {
-							continue;
-						}
-							material_header = (mes_material_header *)(data + material_records[m].offset);
-							swr = WadDirFindByID(&wd, material_header->shader_id);
-							/*
-							sprintf_s(out_filename, sizeof(out_filename),"%s\\%s-%s-%d.verts",wad_out_dir,wr->name, swr->name, m);
-							DumpFloats(
-								data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
-								mesh_header->bytes_per_vertex, 
-								mesh_header->num_vertices1,
-								out_filename);
-								*/
+						material_header = (mes_material_header *)(data + material_records[m].offset);
+						swr = WadDirFindByID(&wd, material_header->shader_id);
+							
+						i = 0;
+
+						
+						sprintf_s(out_filename, sizeof(out_filename),"%s\\%d-%s-%s-%d.verts",wad_out_dir, m, wr->name, swr->name, mesh_header->bytes_per_vertex);
+						DumpFloats(
+							data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
+							mesh_header->bytes_per_vertex, 
+							mesh_header->num_vertices1,
+							out_filename);
+						
 						index_data_size = mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset));
 						
 						if((index_data_size / 2) == mesh_header->num_indices1) {
@@ -547,29 +512,35 @@ int main( int argc, const char* argv[])
 						}
 
 						fprintf(out_file, "o %s_%d\n", wr->name, m);
-						vertex_data = (void*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset);
 
 						// Vertices
+						vertex_data = (void*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset);
+						vertex_byte_data = (uint8_t *)vertex_data;
 						for(v = 0; v < mesh_header->num_vertices1; v++) {
-							wvp(out_file, vertex_data, v);
+							ObjWritePosition(out_file, mesh_header->vertex_format, vertex_byte_data); 
+							vertex_byte_data += mesh_header->bytes_per_vertex;
 						}
 
 						// Texture Coords
+						vertex_byte_data = (uint8_t *)vertex_data;
 						for(v = 0; v < mesh_header->num_vertices1; v++) {
-							wvtc(out_file, vertex_data, v);
+							ObjWriteTexCoord(out_file, mesh_header, vertex_byte_data); 
+							vertex_byte_data += mesh_header->bytes_per_vertex;
 						}
 
 						// Normals
+						vertex_byte_data = (uint8_t *)vertex_data;
 						for(v = 0; v < mesh_header->num_vertices1; v++) {
-							wvn(out_file, vertex_data, v);
+							ObjWriteNormal(out_file, mesh_header, vertex_byte_data);
+							vertex_byte_data += mesh_header->bytes_per_vertex;
 						}
 
+						// Faces
 						material_header = (mes_material_header *)(data + material_records[m].offset);	
 						swr = WadDirFindByID(&wd, material_header->shader_id);
 
-						fprintf(out_file, "usemtl %s_%d\n", swr->name, m);
+						fprintf(out_file, "usemtl %s_%d_%d\n", swr->name, mesh_header->bytes_per_vertex, m);
 						fprintf(out_file, "s off\n");
-						// Faces
 						face_data = (void *)(data + mesh_records[m].offset + mesh_header->index_data_offset);
 						fprintf(out_file, "# Faces %d\n",mesh_header->num_indices1/3);
 						for(idx = 0; idx < mesh_header->num_indices1/3; idx++) {
