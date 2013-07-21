@@ -14,9 +14,7 @@
 #define MINOR_VERSION 1
 #define RELEASE_VERSION 1
 
-typedef void (* WriteVertexData)(FILE * file, void * data, uint32_t index);
 typedef void (* WriteFaceData)(FILE * file, uint32_t offset, void * data, uint32_t index);
-
 
 #define UNCOMPRESSED		0x01 // Vertex position is uncompressed 12 bytes otherwise compressed 8 bytes
 #define UNK_2				0x02
@@ -42,6 +40,7 @@ void PrintBits8(FILE * file, uint8_t bits) {
 		bits >>= 1;
 	}
 }
+
 void PrintBits16(FILE * file, uint16_t bits) {
 	int i;
 	for(i=0; i<16; i++) {
@@ -176,24 +175,9 @@ void ObjWriteTexCoord(FILE * file, mes_mesh_header * mh, uint8_t * vertex_data) 
 	if(mh->uncompressed_texcoord_flags & UNCOMPRESSED_TEXCOORD_1) {
 		u = 	*(float*)(vertex_data + offset);
 		v = 	*(float*)(vertex_data + offset + 4);
-		/* OBJ doesn't support more than 1 texcoord;
-		offset += 8;
-		if(mh->uncompressed_texcoord_flags & UNCOMPRESSED_TEXCOORD_2) {
-			u = 	*(float*)(vertex_data + offset);
-			v = 	*(float*)(vertex_data + offset + 4);
-		} 
-		*/
 	} else if(mh->compressed_texcoord_flags & COMPRESSED_TEXCOORD_1) {
 		u = 	HALFToFloat(*(uint16_t *) (vertex_data + offset));
 		v = 	HALFToFloat(*(uint16_t *) (vertex_data + offset + 2));
-		/* OBJ doesn't support more than 1 texcoord;
-		offset += 4;
-			
-		if(mh->compressed_texcoord_flags & UNCOMPRESSED_TEXCOORD_2) {
-			u = 	HALFToFloat(*(uint16_t *) (vertex_data + offset));
-			v = 	HALFToFloat(*(uint16_t *) (vertex_data + offset + 2));
-		} 
-		*/
 	} else {
 		u = 0.0;
 		v = 0.0;
@@ -227,8 +211,6 @@ unsigned int EndianSwap(unsigned int x)
         (x<<24);
 }
 
-
-
 void Usage(void)
 {
 	printf("Usage mes2obj.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-c] [-f] [-v]\n");
@@ -256,8 +238,6 @@ int main( int argc, const char* argv[])
 	wad_record2 * twr;
 	wad_record2 * swr;
 
-	FILE * log;
-
 	rmid_file rf;
 	FILE * in_file;
 	FILE * out_file;
@@ -273,7 +253,8 @@ int main( int argc, const char* argv[])
 	uint32_t create_name_dir = 0;
 	uint32_t verbose_output = 0;
 	char basename[256];
-
+	char full_out_dir[512];
+	
 	uint8_t * data;
 	mes_header * mh;
 	mes_mesh_record * mesh_records;
@@ -354,14 +335,24 @@ int main( int argc, const char* argv[])
 						continue;
 					}
 
-					if(create_dir) {
+					if(create_wad_dir) {
 						_splitpath_s(wr->filename,NULL,0,NULL,0,basename,sizeof(basename),NULL,0);
 						sprintf_s(wad_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
+						_mkdir(wad_out_dir);
 					} else {
 						strcpy_s(wad_out_dir, sizeof(wad_out_dir), out_dir); 
 					}
-					
-					_mkdir(wad_out_dir);
+
+					if(create_name_dir) {
+						if(create_wad_dir) {
+							sprintf_s(full_out_dir, sizeof(full_out_dir),"%s\\%s",wad_out_dir,wr->name);
+						} else {
+							sprintf_s(full_out_dir, sizeof(full_out_dir),"%s\\%s",out_dir,wr->name);
+						}
+						_mkdir(full_out_dir);
+					} else {
+						strcpy_s(full_out_dir, sizeof(full_out_dir), wad_out_dir); 
+					}
 	
 					fseek(in_file, (long)wr->data_offset, SEEK_SET);
 
@@ -383,9 +374,11 @@ int main( int argc, const char* argv[])
 					printf("0x%08X %s\n", EndianSwap(wr->id), wr->name);
 
 
-					printf("Materials %d\n", mh->total_materials);
+					if(verbose_output) {
+						printf("Materials %d\n", mh->total_materials);
+					}
 
-					sprintf_s(out_filename, sizeof(out_filename),"%s\\%s.mtl",wad_out_dir,wr->name);
+					sprintf_s(out_filename, sizeof(out_filename),"%s\\%s.mtl",full_out_dir,wr->name);
 					if(fopen_s(&out_file, out_filename, "w") != 0) {
 						printf("ERROR: Unable to open file %s\n", out_filename);
 						fclose(in_file);
@@ -401,8 +394,11 @@ int main( int argc, const char* argv[])
 							continue;
 						}
 						WadRecordResolveName(swr);
-						printf(" Shader %s\n", swr->name);
-
+						
+						if(verbose_output) {
+							printf(" Shader %s\n", swr->name);
+						}
+						
 						fprintf(out_file, "newmtl %s_%d_%d\n", swr->name, mesh_header->bytes_per_vertex, m);
 						fprintf(out_file, "Ka 1.000 1.000 1.000\n");
 						fprintf(out_file, "Kd 1.000 1.000 1.000\n");
@@ -411,27 +407,34 @@ int main( int argc, const char* argv[])
 
 						material_params = (mes_material_param *)(data + material_records[m].offset + sizeof(mes_material_header));
 						for(p = 0; p < material_header->total_material_params; p++) {
-							printf("  [%d] T=0x%08X V=0x%08X ", p, EndianSwap(material_params[p].param_type), EndianSwap(material_params[p].texture_id));
+								if(verbose_output) {
+									printf("  [%d] T=0x%08X V=0x%08X ", p, EndianSwap(material_params[p].param_type), EndianSwap(material_params[p].texture_id));
+								}
 							if((twr = WadDirFindByID(&wd, material_params[p].texture_id)) == NULL) {
-								printf("\n");
+								if(verbose_output) {
+									printf("\n");
+								}
 							} else {
 								WadRecordResolveName(twr);
 								if(material_params[p].param_type == RMID_MAT_PARAM_COLOR1) {
 									RmidLoadFromFile(twr->filename, twr->data_offset, twr->data_size, &trf);
-									RmidWriteTexToPng(&trf, wad_out_dir, twr->name); 
+									RmidWriteTexToPng(&trf, full_out_dir, twr->name); 
 									fprintf(out_file, "map_Ka %s.png\n", twr->name);
 									fprintf(out_file, "map_Kd %s.png\n", twr->name);
 									RmidFree(&trf);
 								}
-								printf("%s\n", twr->name);
+								if(verbose_output) {
+									printf("%s\n", twr->name);
+								}
 							}
 						}
 					}
 					fclose(out_file);
 
-					printf("Meshes\n");
-
-					sprintf_s(out_filename, sizeof(out_filename),"%s\\%s.obj",wad_out_dir,wr->name);
+					if(verbose_output) {
+						printf("Meshes\n");
+					}
+					sprintf_s(out_filename, sizeof(out_filename),"%s\\%s.obj",full_out_dir,wr->name);
 					if(fopen_s(&out_file, out_filename, "w") != 0) {
 						printf("ERROR: Unable to open file %s\n", out_filename);
 						fclose(in_file);
@@ -444,64 +447,18 @@ int main( int argc, const char* argv[])
 					for(m = 0;  m < *total_meshes; m++) {
 						mesh_header = (mes_mesh_header*)(data + mesh_records[m].offset);	
 						
-						remove("c:\\temp\\mes2obj3.log");
-						fopen_s(&log, "c:\\temp\\mes2obj3.log", "a");
-						for(i=0; i<16; i++) {
-							fprintf(log,"%02X ",*((uint8_t*)(&mesh_header->vertex_format) + i));
+						if(verbose_output) {
+							printf(" [%d] O=%d", m, mesh_records[m].offset);
+							printf(" S=%d", mesh_records[m].size);
+							printf(" BPV=%d", mesh_header->bytes_per_vertex);
+							printf(" V=%d", mesh_header->num_vertices1);
+							printf(" I=%d\n", mesh_header->num_indices1);
 						}
-						
-						PrintBits16(log, mesh_header->vertex_format);
-						fprintf(log, " ");
-						PrintBits8(log, mesh_header->uncompressed_texcoord_flags);
-						fprintf(log, " ");
-						PrintBits8(log, mesh_header->compressed_texcoord_flags);
-						fprintf(log, " ");
-						fprintf(log,"%2d ",mesh_header->bytes_per_vertex);
-						i = 0;
-						/*
-						if(mesh_header->vertex_format & UNCOMPRESSED) {
-							i += 12; 
-						} else {
-							i += 8; 
-						}
-						if(mesh_header->vertex_format & NORMAL) {
-							i += 12; 
-						}
-						if(mesh_header->vertex_format & TANGENT) {
-							i += 12; 
-						}
-						if(mesh_header->vertex_format & BITANGENT) {
-							i += 12; 
-						}
-						if(mesh_header->vertex_format & UNKNOWN) {
-//							i += 4; 
-						}
-						*/
-						for(;i < mesh_header->bytes_per_vertex; i+=4) {
-							fprintf(log,"%15f ",*(float*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset + i));
-						}
-						
-						fprintf(log, "%s %s\n",swr->name, wr->name);
-						fclose(log);
-						
-						printf(" [%d] O=%d", m, mesh_records[m].offset);
-						printf(" S=%d", mesh_records[m].size);
-						printf(" BPV=%d", mesh_header->bytes_per_vertex);
-						printf(" V=%d", mesh_header->num_vertices1);
-						printf(" I=%d\n", mesh_header->num_indices1);
 
 						material_header = (mes_material_header *)(data + material_records[m].offset);
 						swr = WadDirFindByID(&wd, material_header->shader_id);
 							
 						i = 0;
-
-						
-						sprintf_s(out_filename, sizeof(out_filename),"%s\\%d-%s-%s-%d.verts",wad_out_dir, m, wr->name, swr->name, mesh_header->bytes_per_vertex);
-						DumpFloats(
-							data + mesh_records[m].offset + mesh_header->vertex_data_offset, 
-							mesh_header->bytes_per_vertex, 
-							mesh_header->num_vertices1,
-							out_filename);
 						
 						index_data_size = mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset));
 						
