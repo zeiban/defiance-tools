@@ -75,11 +75,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dxt.h" />
+    <ClInclude Include="objfile.h" />
     <ClInclude Include="rmid.h" />
     <ClInclude Include="rmidlib.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxt.c" />
+    <ClCompile Include="objfile.c" />
     <ClCompile Include="rmidlib.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

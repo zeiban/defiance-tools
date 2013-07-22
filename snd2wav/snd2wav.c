@@ -12,7 +12,7 @@
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
-#define RELEASE_VERSION 0
+#define RELEASE_VERSION 1
 
 unsigned int EndianSwap(unsigned int x)
 {
@@ -30,7 +30,7 @@ void Usage(void)
 	printf("Extracts Defiance textures and converts them to PNG files\n");
 	printf("-i\t Input WAD filename\n");
 	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
-	printf("-m\t Miles Sound System Redist directory. Usianlly in <game install dir>\\live\\MilesRedist \n");
+	printf("-m\t Miles Sound System Redist directory. Usually in <game install dir>\\live\\MilesRedist \n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 	printf("-c\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
 }

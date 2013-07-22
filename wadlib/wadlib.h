@@ -39,7 +39,7 @@ typedef struct {
 } wad_record2;
 
 typedef struct {
-	int8_t * filename;
+	char * filename;
 	uint32_t total_records;
 	wad_record2 * records;
 } wad_file2;
@@ -79,5 +79,8 @@ wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id);
 
 // Sould always be called after WadDirLoad
 void WadDirFree(wad_dir * wd);
+
+int WadWriteMesToObj(wad_dir * wd, wad_record2 * wr,  const char * dir);
+int WadWriteSkiToObj(wad_dir * wd, wad_record2 * wr,  const char * dir);
 
 #endif // _WADLIB_H_

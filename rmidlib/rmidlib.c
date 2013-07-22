@@ -365,6 +365,13 @@ static int PngWriteToFile(FILE * file, uint32_t bits_per_pixel, uint32_t width, 
 	return 0;
 }
 
+uint32_t EndianSwap(uint32_t x) {
+    return (x>>24) | 
+        ((x<<8) & 0x00FF0000) |
+        ((x>>8) & 0x0000FF00) |
+        (x<<24);
+}
+
 int RmidWriteTexToPng(rmid_file * rf,  const char * dir, const char * name) {
 	rmid_tex_header * rmidth;
 	uint8_t * bytes;

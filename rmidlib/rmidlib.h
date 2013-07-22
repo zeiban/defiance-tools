@@ -2,6 +2,7 @@
 #define _RMIDLIB_H_
 
 #include "rmid.h"
+#include "objfile.h"
 
 typedef struct 
 {
@@ -26,10 +27,13 @@ typedef struct
 	rmid_reference * references; 
 } rmid_file;
 
+uint32_t EndianSwap(uint32_t x);
+
 int RmidLoad(FILE * file, uint64_t size, rmid_file * rf);
 int RmidWriteToFile(rmid_file * rf, FILE * file);
 void RmidFree(rmid_file * rf);
 
 int RmidLoadFromFile(const char * filename, uint64_t offset, uint64_t size, rmid_file * rf);
 int RmidWriteTexToPng(rmid_file * rf,  const char * dir, const char * name);
+
 #endif //_RMIDLIB_H_

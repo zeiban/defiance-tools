@@ -5,13 +5,6 @@
 
 #define RMID_MAGIC 'DIMR'
 
-// shd_p_DeferredDiffuseSpecularNormalEmissive 52
-// shd_p_DeferredDiffuseSpecularNormal 52
-// shd_p_DeferredDiffuseSpecularEmissive 52
-// shd_p_DeferredAlphaTestDiffuseSpecularNormalEmissive 60
-// shd_p_DeferredDualDiffuseSpecularNormal 64
-// shd_p_DeferredAlphaTestDualDiffuseSpecularNormal 68
-
 #define RMID_TYPE_RAW	0x0001 // Raw data any format
 #define RMID_TYPE_SHD	0x0002 // Shader
 #define RMID_TYPE_TEX	0x0003 // Texture
@@ -37,6 +30,7 @@
 #define RMID_MAT_PARAM_UNK9		0x761532CF // V=0x00000000
 #define RMID_MAT_PARAM_COLOR3	0x716D7442 // Color texture 3
 #define RMID_MAT_PARAM_EMISSIVE	0xFF780D7C // Emissive Texture (glow)
+
 #pragma pack(push, 1)
 typedef struct {
 	unsigned long long data_offset_offset; 
@@ -184,7 +178,7 @@ typedef struct {
 
 typedef struct {
 	uint32_t	total_materials;	
-	uint32_t	unk1;	
+	uint32_t	total_meshes;	
 	uint32_t	header_size; // includes materials and tables	
 	uint32_t	unk4; 	
 
@@ -199,21 +193,20 @@ typedef struct {
 	uint32_t	unk12;	
 
 	uint64_t mesh_table_offset;	
-	uint64_t mesh_material_table_offset;	
+	uint64_t mesh_material_ids_offset;	
 	uint64_t material_table_offset;	
 	uint64_t unk13; // Always 0	
 
 	uint32_t	unk21;	// last mesh data offset?
 	uint32_t	unk22;	// always 0x0000000 
-	uint32_t	num_array_size;	
+	uint32_t	unk23;	
 	uint32_t	unk24; // always 0x100000xx	
-	// uint32_t * num_array_size
-} mes_header;
+} mes_ski_header;
 
 typedef struct {
 	uint64_t offset;
 	uint64_t size;
-} mes_material_record;
+} mes_ski_material_record;
 
 typedef struct {
 	uint32_t unk1;
@@ -231,7 +224,7 @@ typedef struct {
 	uint32_t unk10;
 	uint32_t unk11;
 
-	uint32_t mlaterial_size; // Includes material_header & all material_params
+	uint32_t material_size; // Includes material_header & all material_params
 	uint32_t unk13;
 	uint32_t unk14;
 	uint32_t unk15;
@@ -241,7 +234,7 @@ typedef struct {
 	uint32_t unk18; // 0
 	uint32_t unk19; // 0
 
-} mes_material_header;
+} mes_ski_material_header;
 
 typedef struct {
 	uint32_t unk1; // 64
@@ -283,12 +276,26 @@ typedef struct {
 	uint32_t unk30;
 	uint32_t unk31;
 	uint32_t unk32;
-} mes_material_param;
+} mes_ski_material_param;
 
 typedef struct {
 	uint64_t offset;
 	uint64_t size;
-} mes_mesh_record;
+} mes_ski_mesh_record;
+
+#define UNCOMPRESSED		0x01 // Vertex position is uncompressed 12 bytes otherwise compressed 8 bytes
+#define UNK_2				0x02
+#define UNK 3				0x04
+#define NORMAL				0x08 // Vertex has normals
+#define TANGENT				0x10 // Vertex has tangent
+#define BITANGENT			0x20 // Vertex has Bitangent
+#define UNKNOWN				0x40 // Unknown 4 bytes in vertex
+#define BIT_8				0x80
+
+#define UNCOMPRESSED_TEXCOORD_1	0x01 // Vertex texcoord1 is uncompressed
+#define UNCOMPRESSED_TEXCOORD_2	0x04 // Vertex texcoord2 is uncompressed
+#define COMPRESSED_TEXCOORD_1	0x01 // Vertex texcoord1 is compressed
+#define COMPRESSED_TEXCOORD_2	0x02 // Vertex texcoord2 is compressed
 
 #pragma pack(push, 1)
 typedef struct {
@@ -366,7 +373,8 @@ typedef struct {
 	uint32_t	unk58;	
 	uint32_t	unk59;	
 	uint32_t	unk60;	
-} mes_mesh_header;
+} mes_ski_mesh_header;
+
 #pragma pack(pop)
 
 typedef struct {
@@ -379,7 +387,7 @@ typedef struct {
 	uint32_t	unk58;	// Always 0
 	uint32_t	unk59;	// Always 0
 	uint32_t	unk60;	// Always total_vertices - 1
-  } mes_mesh_info;
+  } mes_ski_mesh_info;
 
 typedef struct {
 	float x;
@@ -414,140 +422,7 @@ typedef struct {
 	uint32_t v2;
 	uint32_t v3;
 } mes_face_32; 
-
-typedef struct {
-	half_float_3 position; 
-	half_float_3 normal; 
-} mes_vertex_12;
-
-typedef struct {
-	float_3 position; 
-	uint32_t color;
-	float_2 texcoord; 
-	uint32_t unk2; 
-
-} mes_vertex_28;
-
-typedef struct {
-	float_3 position; 
-	float_3 normal; 
-	uint32_t unk1; // 0xFFFF 
-	uint32_t unk2; 
-} mes_vertex_32;
-
-typedef struct {
-	float_3 position; 
-	uint32_t unk1;
-	float_2 texcoord; 
-	uint32_t unk2; // 0xFFFF 
-	uint32_t unk3; 
-	uint32_t unk4; 
-} mes_vertex_36;
-
-
-typedef struct {
-	half_float_3 position; //6
- 	uint16_t unk1; //2
-	float_3 normal; // 12
-	uint32_t unk2; // 4
-
-	uint32_t unk3;
-	uint32_t unk4;
-	uint32_t unk5;
-	uint32_t unk6;
-	uint32_t unk7;
-	uint32_t unk8;
-	half_float_2 texcoord; // 8
-} mes_vertex_52;
-
-typedef struct {
-	half_float_3 position;
- 	uint16_t unk1; 
-	float_3 normal;
-	uint32_t unk2; 
-	uint32_t unk3; 
-	uint32_t unk4;
-	uint32_t unk5;
-	uint32_t unk6;
-	uint32_t unk7;
-
-	uint32_t unk8; // 0xFFFF
-	half_float_2 texcoord1;
-	half_float_2 texcoord2;
-} mes_vertex_56;
-
 /*
-	mes_vertex_60
-	shd_p_DeferredAlphaTestDiffuseSpecularNormalEmissive
-*/
-typedef struct {
-	float_3 position; //6
-	float_3 normal; // 12
-	float_3 tangent;
-	float_3 bitangent;
-	uint32_t unk1;
-	float_2 texcoord; // 8
-} mes_vertex_60;
-
-/*
-	mes_vertex_64
-	shd_p_DeferredDualDiffuseSpecularNormalEmissive
-*/
-typedef struct {
-	half_float_3 position; //6
- 	uint16_t unk1; //2
-	float_3 normal; // 12
-	float_3 tangent;
-	float_3 bitangent;
-	uint32_t unk6;
-	float_2 texcoord1; // 8
-	float_2 texcoord2; // 8
-} mes_vertex_64;
-
-/*
-	mes_vertex_68
-	shd_p_DeferredDualDiffuseSpecularDualNormal
-*/
-typedef struct {
-	float_3 position;
-	half_float_3 normal1; 
-	half_float_3 tangent1;
-	half_float_3 bitangent1;
-	half_float_3 normal2; 
-	half_float_3 tangent2;
-	half_float_3 bitangent2;
-	uint32_t unk12;
-	float_2 texcoord1;
-	float_2 texcoord2;
-} mes_vertex_68_b;
-/*
-	mes_vertex_68
-	shd_p_DeferredAlphaTestDualDiffuseSpecularNormal
-	shd_p_DeferredDualDiffuseSpecularNormal
-*/
-typedef struct {
-	float_3 position;
-	float_3 normal; 
-	float_3 tangent;
-	float_3 bitangent;
-	uint32_t unk12;
-	float_2 texcoord1;
-	float_2 texcoord2;
-} mes_vertex_68;
-
-/*
-	shd_p_DeferredDualDiffuseDualSpecularNormal
-*/
-/*typedef struct {
-	float_3 position;
-	float_3 normal; 
-	float_3 tangent;
-	float_3 bitangent;
-	uint32_t unk12;
-	float_2 texcoord1;
-	float_2 texcoord2;
-} mes_vertex_68_b;
-*/
 typedef struct { //96 bytes
 	uint32_t unk1;
 	uint32_t unk2;
@@ -762,7 +637,6 @@ typedef struct {
 	float	u;	
 	float	v;	
 } mes_ski_vertex;
-*/
 // 60
 typedef struct {
 	short	x;	
@@ -794,7 +668,7 @@ typedef struct {
 	uint32_t id;
 	uint32_t type;
 } mes_ski_id_type;
-
+*/
 typedef struct {
 	uint32_t unk1;
 	uint32_t unk2;
