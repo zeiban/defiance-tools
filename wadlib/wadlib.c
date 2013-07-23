@@ -159,6 +159,7 @@ int WadFileLoad(wad_file2 * wf, const char * filename)  {
 			wf->records[total_records_read].data_offset = wir.data_offset;
 			wf->records[total_records_read].name = NULL;
 			wf->records[total_records_read].data_size = wir.data_size;
+			wf->records[total_records_read].modified_time = wir.modified_time;
 			records_read++;
 			total_records_read++;
 		}
@@ -309,7 +310,6 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 		fclose(in_file);
 		return 1;
 	}
-
 	data = (uint8_t *)rf.data;
 
 	header =			(mes_ski_header*)(data + sizeof(rmid_header));
@@ -325,6 +325,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	sprintf_s(filename, sizeof(filename),"%s\\%s.mtl", dir, wr->name);
 	if(fopen_s(&out_file, filename, "w") != 0) {
 		printf("ERROR: Unable to open file %s\n", filename);
+		RmidFree(&rf);
 		fclose(in_file);
 		return 1;
 	}
@@ -334,6 +335,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 		swr = WadDirFindByID(wd, material_header->shader_id);
 		if(swr == NULL) {
 			printf("Unable to find shader ID 0x%08X", EndianSwap(material_header->shader_id));
+			RmidFree(&rf);
 			fclose(in_file);
 			fclose(out_file);
 			return 1;
@@ -383,6 +385,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	sprintf_s(filename, sizeof(filename),"%s\\%s.obj",dir, wr->name);
 	if(fopen_s(&out_file, filename, "w") != 0) {
 		printf("ERROR: Unable to open file %s\n", filename);
+		RmidFree(&rf);
 		fclose(in_file);
 		return 1;
 	}
@@ -450,9 +453,49 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 		vertex_counter += mesh_header->num_vertices1;
 	}
 	fclose(out_file);
+	RmidFree(&rf);
 	fclose(in_file);
 	return 0;
 }
+int WadWriteRecordToRmid(wad_record2 * wr,  const char * dir, const char * name) {
+	FILE * in_file;
+	FILE * out_file;
+	char filename[512];
+	rmid_file rf;
+
+	if(fopen_s(&in_file, wr->filename, "rb") != 0) {
+		return 1;
+	}
+
+	fseek(in_file, (uint32_t)wr->data_offset, SEEK_CUR);
+	if(RmidLoad(in_file,wr->data_size, &rf) != 0) {
+		return 1;
+	}
+	fclose(in_file);
+
+	if(wr->name == NULL) {
+		WadRecordResolveName(wr);
+	}
+
+	if(name == NULL) {
+		sprintf_s(filename, sizeof(filename), "%s\\%s.rmid", dir, wr->name);
+	} else {
+		sprintf_s(filename, sizeof(filename), "%s\\%s", dir, name);
+	}
+
+	if(fopen_s(&out_file, filename, "wb") != 0) {
+		RmidFree(&rf);
+		return 1;
+	}
+	
+	RmidWriteToFile(&rf, out_file);
+
+	RmidFree(&rf);
+
+	fclose(out_file);
+	return 0;
+}
+
 int WadWriteMesToObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	if(wr->type != RMID_TYPE_MES) {
 		return 1;

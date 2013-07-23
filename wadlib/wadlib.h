@@ -36,6 +36,7 @@ typedef struct {
 	char * name;
 	uint64_t data_offset;
 	uint64_t data_size;
+	uint64_t modified_time;
 } wad_record2;
 
 typedef struct {
@@ -77,8 +78,10 @@ int WadDirLoad(wad_dir * wd, const char * filename);
 // Finds a WAD record by ID
 wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id);
 
-// Sould always be called after WadDirLoad
+// Should always be called after WadDirLoad
 void WadDirFree(wad_dir * wd);
+
+int WadWriteRecordToRmid(wad_record2 * wr,  const char * dir, const char * name);
 
 int WadWriteMesToObj(wad_dir * wd, wad_record2 * wr,  const char * dir);
 int WadWriteSkiToObj(wad_dir * wd, wad_record2 * wr,  const char * dir);

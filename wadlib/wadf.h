@@ -1,6 +1,8 @@
 #ifndef _WADF_H_
 #define _WADF_H_
 
+#include <stdint.h>
+
 #define WADF_REC_TYPE_CON	0x0001 
 
 #define WADF_MAGIC 'FDAW'
@@ -28,7 +30,7 @@ typedef struct {
 	unsigned int data_offset; 
 	unsigned int data_size; 
 	unsigned int name_offset; 
-	unsigned long long modified_time;
+	uint64_t modified_time;
 	unsigned int type; 
 	unsigned int null1; // Always 0  
 } wadf_index_record;
