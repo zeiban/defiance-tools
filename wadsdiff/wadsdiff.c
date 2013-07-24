@@ -237,6 +237,7 @@ int main( int argc, const char* argv[]) {
 	for(w = 0; w < from_wd.total_files; w++) {
 		for(r = 0; r < from_wd.files[w].total_records; r++) {
 			from_wr = &from_wd.files[w].records[r];
+			WadRecordResolveName(from_wr);
 			to_wr = WadDirFindByName(&to_wd, from_wr->name);
 
 			if(((search != NULL) && (strstr(from_wr->name, search) != NULL)) || search == NULL) {
@@ -258,6 +259,7 @@ int main( int argc, const char* argv[]) {
 	for(w = 0; w < to_wd.total_files; w++) {
 		for(r = 0; r < to_wd.files[w].total_records; r++) {
 			to_wr = &to_wd.files[w].records[r];
+			WadRecordResolveName(to_wr);
 			from_wr = WadDirFindByName(&from_wd, to_wr->name);
 
 			if(((search != NULL) && (strstr(to_wr->name, search) != NULL)) || search == NULL) {
