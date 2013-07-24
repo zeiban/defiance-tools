@@ -16,7 +16,7 @@
 
 void Usage(void)
 {
-	printf("Usage snd2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-n]\n");
+	printf("Usage snd2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f]\n");
 	printf("Extracts Defiance audio and converts them to WAV files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-m\t Miles Sound System Redist directory. Usually in <game install dir>\\live\\MilesRedist \n");
