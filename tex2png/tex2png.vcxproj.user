@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-i c:\games\defiance\live\wad\textures04.wad -o c:\temp\defiance\tex2png -c -s tex_1pc_hm_tech_helmet_65_t1_c</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\tex2png -f -n</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

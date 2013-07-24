@@ -18,13 +18,5 @@
     <ClCompile Include="tex2png.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dxt.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="dxt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

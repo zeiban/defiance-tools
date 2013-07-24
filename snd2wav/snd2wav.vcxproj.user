@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-i c:\games\defiance\live\wad\sounds.wad -o c:\temp\defiance\snd2wav -m c:\games\defiance\live\MilesRedist -s snd_cin_101keys_dekusodeath_explo</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\snd2wav -m c:\games\defiance\live\MilesRedist -f</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

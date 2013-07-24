@@ -42,13 +42,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\rmidlib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\zlib;..\libpng</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libpng.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Debug</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>Kernel32.lib</AdditionalDependencies>
+      <AdditionalDependencies>libpng.lib;Kernel32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Debug</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -58,22 +61,32 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\rmidlib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\zlib;..\libpng</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libpng.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>Kernel32.lib</AdditionalDependencies>
+      <AdditionalDependencies>libpng.lib;zlib.lib;Kernel32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Release</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dxt.h" />
+    <ClInclude Include="objfile.h" />
+    <ClInclude Include="rmid.h" />
     <ClInclude Include="wadlib.h" />
     <ClInclude Include="wadf.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dxt.c" />
+    <ClCompile Include="objfile.c" />
+    <ClCompile Include="snd.c" />
+    <ClCompile Include="util.c" />
     <ClCompile Include="wadlib.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

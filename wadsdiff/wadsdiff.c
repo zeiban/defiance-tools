@@ -10,8 +10,9 @@
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
-#define RELEASE_VERSION 0
+#define RELEASE_VERSION 1
 
+/*
 typedef struct {
 	char name[256]; 
 	int size; 
@@ -27,6 +28,7 @@ typedef struct {
 	uint32_t count;
 	wad_info ** wads;
 } dir_info;
+*/
 
 void PrintPercentStatus(float percent) {
 	static char line[256];
@@ -39,8 +41,8 @@ void PrintPercentStatus(float percent) {
 		printf("%s", line);
 		next_update = time(NULL) + 1;
 	}
-	
 }
+/*
 wad_info * ReadWadFile(const char * dir, const char * name) {
 	wad_file wf;
 	wad_record wr;
@@ -149,6 +151,8 @@ record_info * FindRecordInfo(char * name, dir_info* di)
 	}
 	return NULL;
 }
+*/
+
 void Usage() {
 	printf("Usage wadsdiff.exe -f <from_wad_dir> -t <to_wad_dir> -o <out_csv_file> [-s <search>]\n");
 	printf("Compares two Defiance wad directories and tells you what was added, changed, or deleted\n");
@@ -166,13 +170,14 @@ int main( int argc, const char* argv[]) {
 	const char * out_filename;
 
 	FILE * out_file;
-	int i, w, r;
+	int i; 
+	uint32_t w, r;
 	int adds = 0, changes = 0, deletes = 0;
 
-	dir_info * fdi;
-	dir_info * tdi;
-	record_info * fri;
-	record_info * tri;
+	wad_dir from_wd;
+	wad_record2 * from_wr;
+	wad_dir to_wd;
+	wad_record2 * to_wr;
 	int spin = 0;
 
 	int assets_to_check = 0;
@@ -207,21 +212,20 @@ int main( int argc, const char* argv[]) {
 		} 
 	}
 
-	fdi = ReadWadDirectory(from_dir);
-	tdi = ReadWadDirectory(to_dir);
-	
+	WadDirLoad(&from_wd, from_dir);
+	WadDirLoad(&to_wd, to_dir);	
 
 	if(fopen_s(&out_file, out_filename, "w") != 0) {
 		printf("Unable to create file [%s]\n", out_filename);
 		return 1;
 	} 
 
-	for(w = 0; w<fdi->count; w++) {
-		assets_to_check += fdi->wads[w]->count;
+	for(w = 0; w < from_wd.total_files; w++) {
+		assets_to_check += from_wd.files[w].total_records;
 	}
 
-	for(w = 0; w<tdi->count; w++) {
-		assets_to_check += tdi->wads[w]->count;
+	for(w = 0; w < from_wd.total_files; w++) {
+		assets_to_check += to_wd.files[w].total_records;
 	}
 
 	printf("Generating change report to %s ",out_filename);
@@ -230,18 +234,18 @@ int main( int argc, const char* argv[]) {
 	
 	next_update = 0;
 
-	for(w = 0; w<fdi->count; w++) {
-		for(r = 0; r < fdi->wads[w]->count; r++) {
-			fri = &fdi->wads[w]->records[r];
-			tri = FindRecordInfo(fri->name, tdi);
+	for(w = 0; w < from_wd.total_files; w++) {
+		for(r = 0; r < from_wd.files[w].total_records; r++) {
+			from_wr = &from_wd.files[w].records[r];
+			to_wr = WadDirFindByName(&to_wd, from_wr->name);
 
-			if(((search != NULL) && (strstr(fri->name, search) != NULL)) || search == NULL) {
-				if(tri == NULL) {
-					fprintf(out_file, "\"D\",\"%s\",\"%s\",\"%d\"\n", fdi->wads[w]->name, fri->name);
+			if(((search != NULL) && (strstr(from_wr->name, search) != NULL)) || search == NULL) {
+				if(to_wr == NULL) {
+					fprintf(out_file, "\"D\",\"%s\",\"%s\",\"%d\"\n", from_wd.files[w].filename, from_wr->name);
 					deletes++;
 				}
-				else if(fri->size != tri->size) {
-					fprintf(out_file, "\"C\",\"%s\",\"%s\",\"\"\n", fdi->wads[w]->name, fri->name,tri->size - fri->size);
+				else if(from_wr->data_size != to_wr->data_size) {
+					fprintf(out_file, "\"C\",\"%s\",\"%s\",\"\"\n", from_wd.files[w].filename, from_wr->name, to_wr->data_size - from_wr->data_size);
 					changes++;
 				}
 			}
@@ -251,15 +255,14 @@ int main( int argc, const char* argv[]) {
 		}
 	}
 	//To -> From for adds
-	for(w = 0; w<tdi->count; w++) {
-		for(r = 0; r<tdi->wads[w]->count; r++) {
-			tri = &tdi->wads[w]->records[r];
+	for(w = 0; w < to_wd.total_files; w++) {
+		for(r = 0; r < to_wd.files[w].total_records; r++) {
+			to_wr = &to_wd.files[w].records[r];
+			from_wr = WadDirFindByName(&from_wd, to_wr->name);
 
-			if(((search != NULL) && (strstr(tri->name, search) != NULL)) || search == NULL) {
-				fri = FindRecordInfo(tri->name, fdi);
-
-				if(fri == NULL) {
-					fprintf(out_file,"\"A\",\"%s\",\"%s\",\"\"\n", tdi->wads[w]->name, tri->name);
+			if(((search != NULL) && (strstr(to_wr->name, search) != NULL)) || search == NULL) {
+				if(from_wr == NULL) {
+					fprintf(out_file,"\"A\",\"%s\",\"%s\",\"\"\n", to_wd.files[w].filename, to_wr->name);
 					adds++;
 				}
 			}
@@ -268,6 +271,7 @@ int main( int argc, const char* argv[]) {
 			PrintPercentStatus(((float)assets_checked / assets_to_check)* 100.0f);
 		}
 	}
+
 	fclose(out_file);
 	printf("\n\nAsset Stats\n%d Added\n%d Changed\n%d Deleted\n", adds, changes, deletes);
 }

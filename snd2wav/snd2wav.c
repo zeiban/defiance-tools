@@ -7,22 +7,148 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
+
+#include "wadlib.h"
+
+#define MAJOR_VERSION 0
+#define MINOR_VERSION 1
+#define RELEASE_VERSION 1
+
+void Usage(void)
+{
+	printf("Usage snd2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-n]\n");
+	printf("Extracts Defiance audio and converts them to WAV files\n");
+	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
+	printf("-m\t Miles Sound System Redist directory. Usually in <game install dir>\\live\\MilesRedist \n");
+	printf("-o\t (Optional) Directory to output WAV files otherwise the current directory is used\n");
+	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
+	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
+}
+
+int main( int argc, const char* argv[])
+{
+	int i;
+	uint32_t f, r;
+
+	wad_dir wd;
+	wad_record2 * wr;
+
+	void * out_data = NULL;
+	uint32_t out_size = 0;
+	const char * wad_dir = NULL;
+	const char * out_dir = NULL;
+	const char * search_name = NULL;
+	const char * redist_dir = NULL;
+	uint32_t create_wad_dir = 0;
+	uint32_t create_name_dir = 0;
+	char wad_out_dir[256];
+	char basename[256];
+	char full_out_dir[512];
+
+	printf("Defiance Audio Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
+
+	for(i=0; i<argc; i++) {
+		if(strcmp(argv[i],"-w") == 0) {
+			if(argc>i) {
+				wad_dir = argv[++i];
+			}
+		} else if(strcmp(argv[i],"-o") == 0) {
+			if(argc>i) {
+				out_dir = argv[++i];
+			}
+		} else if(strcmp(argv[i],"-s") == 0) {
+			if(argc>i) {
+				search_name = argv[++i];
+			}
+		}  else if(strcmp(argv[i],"-f") == 0) {
+			create_wad_dir = 1;
+		} else if(strcmp(argv[i],"-m") == 0) {
+			if(argc>i) {
+				redist_dir = argv[++i];
+			}
+		} 
+	}
+	
+	if(wad_dir == NULL) {
+		printf("-w required\n");
+		Usage();
+		return 1;
+	}
+
+	if(redist_dir == NULL) {
+		printf("-m required\n");
+		Usage();
+		return 1;
+	}
+
+	if(out_dir == NULL) {
+		out_dir = ".";
+	}
+
+	printf("Input: %s\n", wad_dir);
+	if(search_name != NULL) {
+		printf("Search String: \"%s\"\n", search_name);
+	}
+
+	printf("Output directory: %s\n", out_dir);
+
+	printf("Loading WAD files");
+	if(WadDirLoad(&wd, wad_dir) != 0) {
+		printf(" Failed to open WAD files in %s", wad_dir);
+		return;
+	}
+
+	printf(" %d files loaded\n",wd.total_files);
+
+	for(f = 0; f < wd.total_files; f++) {
+		for(r = 0; r < wd.files[f].total_records; r++) {
+			wr = &wd.files[f].records[r];
+			if(wr->type == RMID_TYPE_SND) {
+				if(WadRecordResolveName(wr) != 0) {
+					printf("Failed to resolve name for ID 0x%08X\n", EndianSwap(wr->id));
+					continue;
+				}
+
+				if(((search_name != NULL) && (strstr(wr->name,search_name) != NULL)) || search_name == NULL) {
+
+					if(create_wad_dir) {
+						_splitpath_s(wr->filename,NULL,0,NULL,0,basename,sizeof(basename),NULL,0);
+						sprintf_s(full_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
+						_mkdir(full_out_dir);
+					} else {
+						strcpy_s(full_out_dir, sizeof(wad_out_dir), out_dir); 
+					}
+	
+					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
+
+					if(WadWriteSndToWav(wr, redist_dir, full_out_dir, wr->name) != 0) {
+						printf("Failed to write WAV file\n");
+					} else {
+						printf("\n");
+					}
+				}
+			}
+		}
+	} 
+	WadDirFree(&wd);
+}
+
+/*
+#ifdef WIN32
+#include <windows.h>
+#include <direct.h>
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <assert.h>
 #include "..\wadlib\wadlib.h"
 #include "..\rmidlib\rmidlib.h"
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
 #define RELEASE_VERSION 1
-
-unsigned int EndianSwap(unsigned int x)
-{
-    return (x>>24) | 
-        ((x<<8) & 0x00FF0000) |
-        ((x>>8) & 0x0000FF00) |
-        (x<<24);
-}
-
-
 
 void Usage(void)
 {
@@ -182,7 +308,7 @@ int main( int argc, const char* argv[])
 				data += sizeof(rmid_snd_header);
 				fn_AIL_set_redist_directory(mss_redist_dir);
 
-				result = fn_AIL_decompress_ASI(data,rf.size - (sizeof(rmid_snd_header)+sizeof(rmid_snd_header)), ".binka", &out_data, &out_size, 0); 
+				result = fn_AIL_decompress_ASI(data,(uint32_t)rf.size - (sizeof(rmid_snd_header)+sizeof(rmid_snd_header)), ".binka", &out_data, &out_size, 0); 
 				if(result == 0)
 				{
 					error = fn_AIL_last_error();
@@ -209,3 +335,4 @@ int main( int argc, const char* argv[])
 	FreeLibrary(module);
 	printf("\n");
 }
+*/

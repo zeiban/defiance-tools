@@ -8,59 +8,17 @@
 #include <time.h>
 #include <assert.h>
 #include "..\wadlib\wadlib.h"
-#include "..\rmidlib\rmidlib.h"
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
 #define RELEASE_VERSION 1
 
-void PrintBits8(FILE * file, uint8_t bits) {
-	int i;
-	for(i=0; i<8; i++) {
-		if (bits & 1)
-			fprintf(file, "1");
-		else
-			fprintf(file, "0");
-		bits >>= 1;
-	}
-}
-
-void PrintBits16(FILE * file, uint16_t bits) {
-	int i;
-	for(i=0; i<16; i++) {
-		if (bits & 1)
-			fprintf(file, "1");
-		else
-			fprintf(file, "0");
-		bits >>= 1;
-	}
-}
-
-int DumpFloats(uint8_t * data, uint32_t size, uint32_t count, char * filename) {
-	FILE * file;
-	uint32_t v, o;
-	float * f;
-	if(fopen_s(&file, filename, "w") != 0) {
-		printf("ERROR: Unable to open file %s\n", filename);
-		return 1;
-	}
-	for(v=0; v < count; v++) {
-		for(o = 0; o < size; o+=4) {
-			f = (float*)(data + (v * size) + o);
-			fprintf(file,"%10f ",*f);
-		}
-		fprintf(file,"\n");
-	}
-
-	fclose(file);
-	return 0;
-}
 void Usage(void)
 {
-	printf("Usage mes2obj.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-c] [-f] [-v]\n");
-	printf("Extracts Defiance meshes and converts them to OBJ files\n");
+	printf("Usage mes2obj.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-n]\n");
+	printf("Extracts Defiance meshes and converts them to OBJ & MTL files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
-	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
+	printf("-o\t (Optional) Directory to output OBJ & MTL files otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
 	printf("-n\t (Optional) Creates a sub directory under the <output_dir> with the name mesh\n");

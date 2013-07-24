@@ -21,9 +21,30 @@
     <ClInclude Include="wadlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dxt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="objfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rmid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="wadlib.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dxt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="objfile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="snd.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

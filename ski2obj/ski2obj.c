@@ -8,55 +8,12 @@
 #include <time.h>
 #include <assert.h>
 #include "..\wadlib\wadlib.h"
-#include "..\rmidlib\rmidlib.h"
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
 #define RELEASE_VERSION 1
 
 typedef void (* WriteFaceData)(FILE * file, uint32_t offset, void * data, uint32_t index);
-
-void PrintBits8(FILE * file, uint8_t bits) {
-	int i;
-	for(i=0; i<8; i++) {
-		if (bits & 1)
-			fprintf(file, "1");
-		else
-			fprintf(file, "0");
-		bits >>= 1;
-	}
-}
-
-void PrintBits16(FILE * file, uint16_t bits) {
-	int i;
-	for(i=0; i<16; i++) {
-		if (bits & 1)
-			fprintf(file, "1");
-		else
-			fprintf(file, "0");
-		bits >>= 1;
-	}
-}
-
-int DumpFloats(uint8_t * data, uint32_t size, uint32_t count, char * filename) {
-	FILE * file;
-	uint32_t v, o;
-	float * f;
-	if(fopen_s(&file, filename, "w") != 0) {
-		printf("ERROR: Unable to open file %s\n", filename);
-		return 1;
-	}
-	for(v=0; v < count; v++) {
-		for(o = 0; o < size; o+=4) {
-			f = (float*)(data + (v * size) + o);
-			fprintf(file,"%10f ",*f);
-		}
-		fprintf(file,"\n");
-	}
-
-	fclose(file);
-	return 0;
-}
 
 /*
 void ObjWritePosition(FILE * file, uint16_t format, uint8_t * vertex_data) {
