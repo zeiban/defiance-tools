@@ -1,10 +1,5 @@
 #include <stdio.h>
 
-#ifdef WIN32
-#include <windows.h>
-#include <direct.h>
-#endif
-
 #include "wadlib.h"
 
 typedef int (CALLBACK* _AIL_decompress_ASI)(void *, unsigned int, char *, void **, unsigned int *, void* );
@@ -34,10 +29,14 @@ int WadWriteSndToWav(wad_record2 * wr, const char * redist_dir, const char * out
 	_AIL_startup fn_AIL_startup;
 	_AIL_shutdown fn_AIL_shutdown;		
 
+	if(wr->type != RMID_TYPE_SND) {
+		return 1;
+	}
+
 	sprintf_s(dll_filename, sizeof(dll_filename), "%s\\mss32.dll", redist_dir);
 	module = LoadLibrary(dll_filename);
 	if(module == NULL) {
-		printf("Unable to load mss32.dll from %s\n", dll_filename);
+		printf("Unable to load mss32.dll from %s. Is the path correct?\n", dll_filename);
 		return 1;
 	}
 
