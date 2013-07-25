@@ -687,13 +687,13 @@ int RmidWriteTexToPng(rmid_file * rf,  uint32_t y_invert, const char * dir, cons
 
 		if(rmidth->format == 1) {
 			DecompressDXT1(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
-		} else if(rmidth->format == 3){
+		} else if(rmidth->format == 8 || rmidth->format == 3){
 			DecompressDXT5(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
+			/*
 			for(i=0; i < (rmidth->mmh1.width * rmidth->mmh1.height * 4); i += 4) {
 				*(((uint8_t * )image) + i + 3) = 255;
 			}
-		} else if(rmidth->format == 8){
-			DecompressDXT5(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
+			*/
 		}
 
 		sprintf_s(filename,sizeof(filename), "%s\\%s.png", dir, name);
