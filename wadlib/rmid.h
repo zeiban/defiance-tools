@@ -179,7 +179,7 @@ typedef struct {
 typedef struct {
 	uint32_t	total_materials;	
 	uint32_t	total_meshes;	
-	uint32_t	header_size; // includes materials and tables	
+	uint32_t	mesh_group_table_offset;	
 	uint32_t	unk4; 	
 
 	uint32_t	unk5;	

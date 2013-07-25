@@ -31,7 +31,7 @@ int main( int argc, const char* argv[])
 	uint32_t f, r;
 
 	wad_dir wd;
-	wad_record2 * wr;
+	wad_record * wr;
 
 	void * out_data = NULL;
 	uint32_t out_size = 0;
@@ -83,6 +83,11 @@ int main( int argc, const char* argv[])
 
 	if(out_dir == NULL) {
 		out_dir = ".";
+	} else {
+		if(!DirectoryExists(out_dir)) {
+			printf("The output directoy %s doesn't exist\n", out_dir);
+			return 1;
+		}
 	}
 
 	printf("Input: %s\n", wad_dir);

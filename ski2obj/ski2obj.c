@@ -3,11 +3,13 @@
 #include <direct.h>
 #endif
 
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <assert.h>
-#include "..\wadlib\wadlib.h"
+#include "wadlib.h"
+#include "util.h"
 
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 1
@@ -15,14 +17,13 @@
 
 void Usage(void)
 {
-	printf("Usage ski2obj.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-c] [-f] [-v]\n");
+	printf("Usage ski2obj.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-c] [-f]\n");
 	printf("Extracts Defiance skinned meshes and converts them to OBJ files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
-	printf("-o\t (Optional) Directory to output PNG file otherwise the current directory is used\n");
+	printf("-o\t (Optional) Directory to output OBJ, MTL & PNG files otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
 	printf("-n\t (Optional) Creates a sub directory under the <output_dir> with the name mesh\n");
-	printf("-v\t (Optional) Verbose output. Outputs more information than you proably want to know.\n");
 }
 
 int main( int argc, const char* argv[])
@@ -31,7 +32,7 @@ int main( int argc, const char* argv[])
 	uint32_t f, r;
 
 	wad_dir wd;
-	wad_record2 * wr;
+	wad_record * wr;
 
 	void * out_data = NULL;
 	uint32_t out_size = 0;
@@ -74,8 +75,14 @@ int main( int argc, const char* argv[])
 
 	if(out_dir == NULL) {
 		out_dir = ".";
+	} else {
+		if(!DirectoryExists(out_dir)) {
+			printf("The output directoy %s doesn't exist\n", out_dir);
+			return 1;
+		}
 	}
 
+	
 	printf("Input: %s\n", wad_dir);
 	if(search_name != NULL) {
 		printf("Search String: \"%s\"\n", search_name);

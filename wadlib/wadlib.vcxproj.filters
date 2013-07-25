@@ -30,6 +30,9 @@
     <ClInclude Include="rmid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="wadlib.c">
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="snd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ski.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -175,9 +175,9 @@ int main( int argc, const char* argv[]) {
 	int adds = 0, changes = 0, deletes = 0;
 
 	wad_dir from_wd;
-	wad_record2 * from_wr;
+	wad_record * from_wr;
 	wad_dir to_wd;
-	wad_record2 * to_wr;
+	wad_record * to_wr;
 	int spin = 0;
 
 	int assets_to_check = 0;

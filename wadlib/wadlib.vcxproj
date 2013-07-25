@@ -79,12 +79,14 @@
     <ClInclude Include="dxt.h" />
     <ClInclude Include="objfile.h" />
     <ClInclude Include="rmid.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="wadlib.h" />
     <ClInclude Include="wadf.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxt.c" />
     <ClCompile Include="objfile.c" />
+    <ClCompile Include="ski.c" />
     <ClCompile Include="snd.c" />
     <ClCompile Include="util.c" />
     <ClCompile Include="wadlib.c" />

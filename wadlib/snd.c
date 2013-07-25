@@ -9,7 +9,7 @@ typedef void (CALLBACK* _AIL_mem_free_lock)(void *);
 typedef int (CALLBACK* _AIL_startup)();
 typedef int (CALLBACK* _AIL_shutdown)();
 
-int WadWriteSndToWav(wad_record2 * wr, const char * redist_dir, const char * out_dir, const char * name) {
+int WadWriteSndToWav(wad_record * wr, const char * redist_dir, const char * out_dir, const char * name) {
 	char dll_filename[512];
 	char out_filename[512];
 	HMODULE module;

@@ -7,7 +7,6 @@
 #include <string.h>
 #include <assert.h>
 
-//#include "zlib.h"
 #include "png.h"
 
 #include "dxt.h"
@@ -18,120 +17,7 @@
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define CHUNK 1024
 
-#ifdef _DEBUG
-# define DEBUG_PRINT(x) printf x
-#else
-# define DEBUG_PRINT(x) do {} while (0)
-#endif
-/*
-int WadOpen(wad_file * wf, const char * filename)
-{
-	wadf_header wadfh;
-	wadf_index_header wadfih;
-
-	if(wf == NULL) return 1;
-	if(filename == NULL) return 1;
-
-	if(fopen_s(&wf->file, filename,"rb") != 0)
-	{
-		return 1;
-	}
-	strcpy_s(wf->name, strlen(filename)+1, filename);
-	fread(&wadfh, sizeof(wadf_header), 1, wf->file);
-
-	if(wadfh.magic != WADF_MAGIC)
-	{
-		fclose(wf->file);
-		return 1;
-	}
-
-	fread(&wadfih,sizeof(wadf_index_header),1, wf->file);
-
-	wf->total_records = wadfh.total_records;
-	wf->total_records_read = 0;
-	wf->index_records_read = 0;
-	wf->total_index_records = wadfih.num_records;
-	wf->next_index_header_offset = wadfih.next_header_offset;
-	return 0;
-}
-
-int WadRecordRead(wad_file * wf, wad_record * wr, int read_name)
-{
-	wadf_index_header wadfih;
-	wadf_index_record wadfir;
-	long offset;
-
-	if(wf->total_records_read < wf->total_records)
-	{
-		if(wf->index_records_read == wf->total_index_records)
-		{
-			wf->index_records_read = 0;
-			if(wf->next_index_header_offset != 0) 
-			{
-				fseek(wf->file, wf->next_index_header_offset,SEEK_SET);
-				fread(&wadfih,sizeof(wadf_index_header),1, wf->file);
-				wf->next_index_header_offset = wadfih.next_header_offset;
-				wf->total_index_records = wadfih.num_records;
-			}
-			else
-			{
-				return 0;
-			}
-
-		}
-
-		fread(&wadfir,sizeof(wadfir),1, wf->file);
-		wr->offset = wadfir.data_offset;
-		wr->size = wadfir.data_size;
-		wr->type = wadfir.type;
-		wr->id = wadfir.id;
-		wr->name_offset = wadfir.name_offset;
-
-		if(read_name == 1)
-		{
-			offset = ftell(wf->file);
-			fseek(wf->file, wr->name_offset, SEEK_SET);
-			fread(&wr->name, sizeof(wr->name),1, wf->file);
-			fseek(wf->file, offset, SEEK_SET);
-		}
-		wf->index_records_read++;
-		wf->total_records_read++;
-		return 1;
-
-	}
-	return 0;
-}
-
-int WadRecordToFile(wad_file * wf, wad_record * wr, const char * filename) {
-	FILE * file;
-	long offset;
-	long bytes_read = 0;
-	int bytes_to_copy;
-	char buffer[2048];
-	if(fopen_s(&file, filename, "wb") != 0) {
-		return 1;
-	}
-
-	offset = ftell(wf->file);
-	fseek(wf->file, wr->offset, SEEK_SET);
-
-	while(bytes_read < wr->size) {
-		bytes_to_copy = MIN(sizeof(buffer),wr->size - bytes_read);
-		bytes_read += fread(&buffer, 1,bytes_to_copy, wf->file); 
-		fwrite(&buffer, 1, bytes_to_copy, file);
-	}
-	fseek(wf->file, offset, SEEK_SET);
-	fclose(file);
-	return 0;
-}
-
-void WadClose(wad_file * wf) {
-	fclose(wf->file);
-}
-
-*/
-
-int WadFileLoad(wad_file2 * wf, const char * filename)  {
+int WadFileLoad(wad_file * wf, const char * filename)  {
 	FILE * file;
 	wadf_header wh;
 	wadf_index_header wih;
@@ -153,7 +39,7 @@ int WadFileLoad(wad_file2 * wf, const char * filename)  {
 	wf->filename = (int8_t *)malloc(strlen(filename)+1);
 	strcpy_s(wf->filename, strlen(filename)+1, filename);
 	wf->total_records = wh.total_records;
-	wf->records = (wad_record2 * )malloc(sizeof(wad_record2) * wh.total_records);
+	wf->records = (wad_record * )malloc(sizeof(wad_record) * wh.total_records);
 
 	while(total_records_read < wh.total_records) {
 		fread(&wih,sizeof(wadf_index_header),1, file);
@@ -179,7 +65,7 @@ int WadFileLoad(wad_file2 * wf, const char * filename)  {
 	fclose(file);
 	return 0;
 }
-int WadRecordResolveName(wad_record2 * wr) {
+int WadRecordResolveName(wad_record * wr) {
 	FILE * file;
 	wadf_header wh;
 	char name[256];
@@ -206,7 +92,7 @@ int WadRecordResolveName(wad_record2 * wr) {
 	return 0;
 }
 
-void WadFileFree(wad_file2 * wf) {
+void WadFileFree(wad_file * wf) {
 	uint32_t i;
 	free(wf->filename);
 	for(i=0; i<wf->total_records; i++) {
@@ -238,7 +124,7 @@ int WadDirLoad(wad_dir * wd, const char * dir) {
 	} while(FindNextFile(hFind, &ffd) != 0);
 	FindClose(hFind);
 	wd->total_files = count;
-	wd->files = (wad_file2*)malloc(sizeof(wad_file2) * wd->total_files);
+	wd->files = (wad_file*)malloc(sizeof(wad_file) * wd->total_files);
 
 	count=0;
 	hFind = FindFirstFile(search_dir, &ffd);
@@ -259,7 +145,7 @@ int WadDirLoad(wad_dir * wd, const char * dir) {
 	return 0;
 }
 
-wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id) {
+wad_record * WadDirFindByID(wad_dir * wd, uint32_t id) {
 	uint32_t f;
 	uint32_t r;
 
@@ -272,7 +158,7 @@ wad_record2 * WadDirFindByID(wad_dir * wd, uint32_t id) {
 	}
 	return NULL;
 }
-wad_record2 * WadDirFindByName(wad_dir * wd, const char * name) {
+wad_record * WadDirFindByName(wad_dir * wd, const char * name) {
 	uint32_t f;
 	uint32_t r;
 
@@ -298,7 +184,7 @@ void WadDirFree(wad_dir * wd) {
 	free(wd->files);
 }
 
-static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
+static int WadWriteObj(wad_dir * wd,  wad_record * wr, const char * dir) {
 	uint8_t * data;
 	mes_ski_header * header;
 	uint32_t * mesh_material_ids;
@@ -310,8 +196,8 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	FILE * in_file;
 	FILE * out_file;
 	rmid_file rf;
-	wad_record2 * swr;
-	wad_record2 * twr;
+	wad_record * swr;
+	wad_record * twr;
 	char filename[512];
 	uint32_t m, p, v, f;
 	rmid_file trf;
@@ -321,7 +207,6 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	uint8_t * vertex_byte_data;
 	void * face_data;
 	uint32_t total_meshes;
-//	mes_ski_mesh_record * mesh_records_check;
 
 	if(fopen_s(&in_file, wr->filename, "rb") != 0) {
 		printf("ERROR: Unable to open file %s\n", wr->filename);
@@ -340,12 +225,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	mesh_material_ids = (uint32_t*)(data + header->mesh_material_ids_offset); 
 	mesh_records =		(mes_ski_mesh_record*)(data + header->mesh_table_offset);
 	material_records =	(mes_ski_material_record*)(data + header->material_table_offset);
-	//header->total_meshes+=1;
-	/*
-	if(verbose_output) {
-		printf("Materials %d\n", header->total_materials);
-	}
-	*/
+
 	sprintf_s(filename, sizeof(filename),"%s\\%s.mtl", dir, wr->name);
 	if(fopen_s(&out_file, filename, "w") != 0) {
 		printf("ERROR: Unable to open file %s\n", filename);
@@ -396,15 +276,6 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 
 	total_meshes = *((uint32_t *)&material_records[header->total_materials]);
 	
-	//total_meshes = header->total_meshes;
-	/*
-	mesh_records_check = mesh_records;
-	total_meshes = 0;
-	while((uint32_t*)mesh_records_check != (uint32_t*)material_records) {
-		mesh_records_check++;
-		total_meshes++;
-	}
-	*/
 	DEBUG_PRINT(("Meshes %d\n", total_meshes));
 	sprintf_s(filename, sizeof(filename),"%s\\%s.obj",dir, wr->name);
 	if(fopen_s(&out_file, filename, "w") != 0) {
@@ -482,7 +353,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
 	return 0;
 }
 
-int WadWriteTexToPng(wad_record2 * wr,  int y_invert, const char * dir, const char * name) {
+int WadWriteTexToPng(wad_record * wr,  int y_invert, const char * dir, const char * name) {
 	rmid_file rf;
 
 	if(wr->type != RMID_TYPE_TEX) {
@@ -502,7 +373,7 @@ int WadWriteTexToPng(wad_record2 * wr,  int y_invert, const char * dir, const ch
 	return 0;
 }
 
-int WadWriteRecordToRmid(wad_record2 * wr,  const char * dir, const char * name) {
+int WadWriteRecordToRmid(wad_record * wr,  const char * dir, const char * name) {
 	FILE * in_file;
 	FILE * out_file;
 	char filename[512];
@@ -541,19 +412,13 @@ int WadWriteRecordToRmid(wad_record2 * wr,  const char * dir, const char * name)
 	return 0;
 }
 
-int WadWriteMesToObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
+int WadWriteMesToObj(wad_dir * wd,  wad_record * wr, const char * dir) {
 	if(wr->type != RMID_TYPE_MES) {
 		return 1;
 	}
 	return WadWriteObj(wd, wr, dir);
 }
 
-int WadWriteSkiToObj(wad_dir * wd,  wad_record2 * wr, const char * dir) {
-	if(wr->type != RMID_TYPE_SKI) {
-		return 1;
-	}
-	return WadWriteObj(wd, wr, dir);
-}
 
 static int InflateToMemory(FILE * file, void * data)
 {
@@ -822,7 +687,12 @@ int RmidWriteTexToPng(rmid_file * rf,  uint32_t y_invert, const char * dir, cons
 
 		if(rmidth->format == 1) {
 			DecompressDXT1(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
-		} else if(rmidth->format == 3 || rmidth->format == 8){
+		} else if(rmidth->format == 3){
+			DecompressDXT5(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
+			for(i=0; i < (rmidth->mmh1.width * rmidth->mmh1.height * 4); i += 4) {
+				*(((uint8_t * )image) + i + 3) = 255;
+			}
+		} else if(rmidth->format == 8){
 			DecompressDXT5(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
 		}
 

@@ -204,7 +204,6 @@ void DecompressBlockDXT5(uint32_t x, uint32_t y, uint32_t width, uint8_t * block
 
             color_code = (code >> 2*(4*j+i)) & 0x03; 
             final_color = 0;
-
             switch (color_code) {
             case 0:
                     final_color = PackRGBA(r0, g0, b0, final_alpha);

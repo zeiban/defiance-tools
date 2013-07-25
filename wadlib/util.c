@@ -1,5 +1,19 @@
+#ifdef _WIN32
+	#include <windows.h>
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
+
+
+#ifdef _WIN32
+uint32_t DirectoryExists(const char * path) {
+  DWORD dwAttrib = GetFileAttributes(path);
+
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+#endif
 
 void PrintBits8(FILE * file, uint8_t bits) {
 	int i;
