@@ -2,7 +2,7 @@
 ==============
 
 ## Overview ##
-These are a series of unofficial tools to extract various assets from the PC version of Defiance. 
+These are a series of unofficial command-line tools to extract various assets from the PC version of Defiance. 
 
 ## Compiling ##
 All the tools were created using Visual C++ Exress 2010. If you have that you should be good to go. All the depenancies like zlib and libpng are included in the solution. 
