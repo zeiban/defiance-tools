@@ -30,10 +30,10 @@ General library for reading and dumping asset records from WAD files. Useful if 
 
 
 ## Releases ##
-###0.1.0###
+#####0.1.0#####
 Initial release.
 
-###0.2.0###
+#####0.2.0#####
 Added support for skinned mesh extraction with ski2obj
 Moved rmidlib code to wadlib
 Cleaned up and standardized the usage for all the tools. Use -h to see usage.
