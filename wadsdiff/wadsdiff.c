@@ -188,7 +188,7 @@ int main( int argc, const char* argv[]) {
 
 	memset(line, 0, sizeof(line));	
 	
-	printf("WAD Difference Report Generator by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
+	printf("Defiance Tools WAD Difference Report Generator by Zeiban v%d.%d.%d%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_SUFFIX);
 
 	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-f") == 0) {

@@ -42,7 +42,7 @@ int main( int argc, const char* argv[])
 	char basename[256];
 	char full_out_dir[512];
 
-	printf("Defiance Texture Extraction Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
+	printf("Defiance Tools Texture Extraction Utility by Zeiban v%d.%d.%d%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_SUFFIX);
 
 	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-w") == 0) {

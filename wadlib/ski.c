@@ -102,7 +102,7 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, const char * dir) {
 				WadRecordResolveName(twr);
 				if(material_params[p].param_type == RMID_MAT_PARAM_COLOR1) {
 					RmidLoadFromFile(twr->filename, twr->data_offset, twr->data_size, &trf);
-					RmidWriteTexToPng(&trf, 1, dir, twr->name); 
+					RmidWriteTexToPng(&trf, 0, dir, twr->name); 
 					fprintf(out_file, "map_Ka %s.png\n", twr->name);
 					fprintf(out_file, "map_Kd %s.png\n", twr->name);
 					RmidFree(&trf);

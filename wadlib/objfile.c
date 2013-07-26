@@ -114,6 +114,8 @@ void ObjWriteTexCoord(FILE * file, mes_ski_mesh_header * mh, uint8_t * vertex_da
 		v = 0.0;
 	}
 
+	v  *= -1.0f;
+
 	fprintf(file, "vt %f %f\n", u, v);
 
 }

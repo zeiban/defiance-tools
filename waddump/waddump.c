@@ -46,7 +46,7 @@ int main( int argc, const char* argv[])
 	char date_time[256];
 	uint32_t total_records = 0;
 
-	printf("Defiance WAD Dump Utility by Zeiban v%d.%d.%d\n", MAJOR_VERSION, MINOR_VERSION, RELEASE_VERSION);
+	printf("Defiance Tools WAD Dump Utility by Zeiban v%d.%d.%d%s\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_SUFFIX);
 
 	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-w") == 0) {

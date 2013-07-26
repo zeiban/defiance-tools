@@ -11,6 +11,11 @@
 # define DEBUG_PRINT(x) do {} while (0)
 #endif
 
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 2
+#define VERSION_PATCH 0
+#define VERSION_SUFFIX ""
+
 #include <stdint.h>
 
 #include "wadf.h"
@@ -63,6 +68,8 @@ void WadDirFree(wad_dir * wd);
 int WadWriteRecordToRmid(wad_record * wr,  const char * dir, const char * name);
 
 int WadWriteTexToPng(wad_record * wr, int y_invert, const char * dir, const char * name);
+int WadWriteTexToDds(wad_record * wr, int y_invert, const char * dir, const char * name);
+
 int WadWriteMesToObj(wad_dir * wd, wad_record * wr,  const char * dir);
 int WadWriteSkiToObj(wad_dir * wd, wad_record * wr,  const char * dir);
 

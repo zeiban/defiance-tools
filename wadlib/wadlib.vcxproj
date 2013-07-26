@@ -76,6 +76,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dds.h" />
     <ClInclude Include="dxt.h" />
     <ClInclude Include="objfile.h" />
     <ClInclude Include="rmid.h" />
@@ -88,6 +89,7 @@
     <ClCompile Include="objfile.c" />
     <ClCompile Include="ski.c" />
     <ClCompile Include="snd.c" />
+    <ClCompile Include="tex.c" />
     <ClCompile Include="util.c" />
     <ClCompile Include="wadlib.c" />
   </ItemGroup>

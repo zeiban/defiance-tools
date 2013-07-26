@@ -353,26 +353,6 @@ static int WadWriteObj(wad_dir * wd,  wad_record * wr, const char * dir) {
 	return 0;
 }
 
-int WadWriteTexToPng(wad_record * wr,  int y_invert, const char * dir, const char * name) {
-	rmid_file rf;
-
-	if(wr->type != RMID_TYPE_TEX) {
-		return 1;
-	}
-
-	if(RmidLoadFromFile(wr->filename, wr->data_offset, wr->data_size, &rf) != 0) {
-		return 1;
-	}
-	
-	if(RmidWriteTexToPng(&rf, y_invert, dir, name == NULL ? name : wr->name) != 0) {
-		RmidFree(&rf);
-		return 1;
-	}
-
-	RmidFree(&rf);
-	return 0;
-}
-
 int WadWriteRecordToRmid(wad_record * wr,  const char * dir, const char * name) {
 	FILE * in_file;
 	FILE * out_file;
