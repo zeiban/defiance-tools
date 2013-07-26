@@ -7,11 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
-#include "..\wadlib\wadlib.h"
-
-#define MAJOR_VERSION 0
-#define MINOR_VERSION 1
-#define RELEASE_VERSION 1
+#include "wadlib.h"
 
 void Usage(void)
 {

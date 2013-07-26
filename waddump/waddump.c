@@ -8,10 +8,6 @@
 #include <time.h>
 #include "wadlib.h"
 
-#define MAJOR_VERSION 0
-#define MINOR_VERSION 1
-#define RELEASE_VERSION 1
-
 void Usage(void) {
 	printf("Usage waddump.exe [-x] [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-n]\n");
 	printf("Lists or Extract RMID assets from WAD files\n");
