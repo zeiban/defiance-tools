@@ -1,5 +1,4 @@
 # Defiance Tools #
-==============
 
 ## Overview ##
 These are a series of unofficial command-line tools to extract various assets from the PC version of Defiance. 
