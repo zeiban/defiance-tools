@@ -18,6 +18,7 @@ void Usage(void) {
 	printf("-f\t (Optional) Extraction creates a sub directory under the <output_dir> with the name of the WAD file\n");
 	printf("-n\t (Optional) Extraction Creates a sub directory under the <output_dir> with the asset name\n");
 	printf("-d\t (Optional) Display internal asset datetime stamp\n");
+	printf("-h\t Displays this information\n");
 }
 
 int main( int argc, const char* argv[])
@@ -65,6 +66,9 @@ int main( int argc, const char* argv[])
 			extract_files = 1;
 		}  else if(strcmp(argv[i],"-d") == 0) {
 			display_datetime = 1;
+		}  else if(strcmp(argv[i],"-h") == 0) {
+			Usage();
+			return 1;
 		} 
 	}
 	

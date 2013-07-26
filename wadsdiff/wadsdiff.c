@@ -28,6 +28,7 @@ void Usage() {
 	printf("-t\t Directory to compare to\n");
 	printf("-o\t Name of the output CSV file to create.\n");
 	printf("-s\t (Optional) Only report on assets with <search> in the name\n");
+	printf("-h\t Displays this information\n");
 }
 
 int main( int argc, const char* argv[]) {
@@ -77,6 +78,9 @@ int main( int argc, const char* argv[]) {
 			if(argc>i) {
 				out_filename = argv[++i];
 			}
+		}  else if(strcmp(argv[i],"-h") == 0) {
+			Usage();
+			return 1;
 		} 
 	}
 

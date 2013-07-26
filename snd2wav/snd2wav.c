@@ -19,6 +19,7 @@ void Usage(void)
 	printf("-o\t (Optional) Directory to output WAV files otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
+	printf("-h\t Displays this information\n");
 }
 
 int main( int argc, const char* argv[])
@@ -62,6 +63,9 @@ int main( int argc, const char* argv[])
 			if(argc>i) {
 				redist_dir = argv[++i];
 			}
+		}  else if(strcmp(argv[i],"-h") == 0) {
+			Usage();
+			return 1;
 		} 
 	}
 	
