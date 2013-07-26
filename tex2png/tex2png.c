@@ -11,7 +11,7 @@
 
 void Usage(void)
 {
-	printf("Usage tex2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-n]\n");
+	printf("Usage tex2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f]\n");
 	printf("Extracts Defiance Texture and converts them to PNG files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-o\t (Optional) Directory to output PNG files otherwise the current directory is used\n");

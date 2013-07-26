@@ -4,4 +4,8 @@
     <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\waddump -f -n</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\waddump -f -n</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

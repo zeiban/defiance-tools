@@ -9,14 +9,13 @@
 #include "wadlib.h"
 
 void Usage(void) {
-	printf("Usage waddump.exe [-x] [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-n]\n");
+	printf("Usage waddump.exe [-x] [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f]\n");
 	printf("Lists or Extract RMID assets from WAD files\n");
 	printf("-x\t Extracts assets to RMID files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-o\t Directory to output RMID files. Current directory is used if not specified\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 	printf("-f\t (Optional) Extraction creates a sub directory under the <output_dir> with the name of the WAD file\n");
-	printf("-n\t (Optional) Extraction Creates a sub directory under the <output_dir> with the asset name\n");
 	printf("-d\t (Optional) Display internal asset datetime stamp\n");
 	printf("-h\t Displays this information\n");
 }
@@ -116,22 +115,12 @@ int main( int argc, const char* argv[])
 
 				if(create_wad_dir) {
 					_splitpath_s(wr->filename,NULL,0,NULL,0,basename,sizeof(basename),NULL,0);
-					sprintf_s(wad_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
-					_mkdir(wad_out_dir);
-				} else {
-					strcpy_s(wad_out_dir, sizeof(wad_out_dir), out_dir); 
-				}
-
-				if(create_name_dir) {
-					if(create_wad_dir) {
-						sprintf_s(full_out_dir, sizeof(full_out_dir),"%s\\%s",wad_out_dir,wr->name);
-					} else {
-						sprintf_s(full_out_dir, sizeof(full_out_dir),"%s\\%s",out_dir,wr->name);
-					}
+					sprintf_s(full_out_dir, sizeof(wad_out_dir),"%s\\%s",out_dir,basename);
 					_mkdir(full_out_dir);
 				} else {
-					strcpy_s(full_out_dir, sizeof(full_out_dir), wad_out_dir); 
+					strcpy_s(full_out_dir, sizeof(wad_out_dir), out_dir); 
 				}
+
 				printf("0x%08X 0x%02X ",  EndianSwap(wr->id), (uint16_t)wr->type);
 				if(display_datetime) {
 					localtime_s(&time,&wr->modified_time);
