@@ -32,7 +32,7 @@ The following example will extract and convert all the sminned meshes from the W
 *ski2obj.exe -w c:\games\defiance\live\wad -o c:\temp*  
   
 ### waddump ###
-Used to dump individual assets from WAD files. It will decompress any compressed assets as well. Useful for extracting assets for research but doesn't convert. Run with -h to see usage.  
+Used to dump individual RMID assets from WAD archive files. It will decompress any compressed assets as well. Useful for extracting assets for research but doesn't convert any end user format. Run with -h to see usage.  
 
 ### waddiff ###
 Compares 2 directories containing WAD files and generates a CSV file that exaplains what was added, deleted and changed. Very useful if you want to know what changed between client patches.  
@@ -42,11 +42,13 @@ General library for reading and dumping asset records from WAD files. Useful if 
 
 
 ## Releases ##
-#####v0.1.0#####
-Initial release.
-
 #####v0.2.0#####
 * Added support for skinned mesh extraction with ski2obj
 * Moved rmidlib code to wadlib
 * Cleaned up and standardized the usage for all the tools. Use -h to see usage.
 * Initial internal DDS export support. Cubemaps are not supported yet. 
+
+#####v0.1.0#####
+* Initial release
+* ?
+* Profit!
