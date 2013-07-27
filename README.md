@@ -46,7 +46,7 @@ General library for reading and dumping asset records from WAD files. Useful if 
 Initial release.
 
 #####v0.2.0#####
-Added support for skinned mesh extraction with ski2obj
-Moved rmidlib code to wadlib
-Cleaned up and standardized the usage for all the tools. Use -h to see usage.
-Initial internal DDS export support. Cubemaps are not supported yet. 
+* Added support for skinned mesh extraction with ski2obj
+* Moved rmidlib code to wadlib
+* Cleaned up and standardized the usage for all the tools. Use -h to see usage.
+* Initial internal DDS export support. Cubemaps are not supported yet. 
