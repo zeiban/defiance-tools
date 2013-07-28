@@ -42,8 +42,8 @@ General library for reading and dumping asset records from WAD files. Useful if 
 
 ## Releases ##
 #####v0.3.0#####
-* Add a depth value to the -n switch for mes2obj and ski2obj to allow sub directories to be generated based off asset names using "_" (underscore) as a delmiter.
-* Cleanup of Usage for mes2obj and ski2obj for better readability. It was exceding 80 chars are wraping
+* Add a depth value to the -n switch for mes2obj and ski2obj to allow sub directories to be generated based off asset names using "_" (underscore) as a delimiter.
+* Cleanup of Usage for mes2obj and ski2obj for better readability. It was exceeding 80 chars are wrapping
 
 #####v0.2.0#####
 * Added support for skinned mesh extraction with ski2obj
