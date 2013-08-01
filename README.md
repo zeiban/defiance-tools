@@ -41,6 +41,10 @@ Compares 2 directories containing WAD files and generates a CSV file that exapla
 General library for reading and dumping asset records from WAD files. Useful if you want to write your own tools. The API is still unstable so expect it to change. 
 
 ## Releases ##
+#####v0.4.0#####
+* Fixed switch parsing issue with -n switch
+* Added -oa switch to tex2png, mes2obj, ski2obj to make the alpha channel in output textures opaque.
+
 #####v0.3.0#####
 * Add a depth value to the -n switch for mes2obj and ski2obj to allow sub directories to be generated based off asset names using "_" (underscore) as a delimiter.
 * Cleanup of Usage for mes2obj and ski2obj for better readability. It was exceeding 80 chars and were Swrapping

@@ -82,7 +82,7 @@ int main( int argc, const char* argv[])
 				}
 			}
 		} else if(strcmp(argv[i],"-oa") == 0) {
-			opaque_alpha = 0;
+			opaque_alpha = 1;
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;
