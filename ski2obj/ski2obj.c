@@ -75,7 +75,10 @@ int main( int argc, const char* argv[])
 			create_wad_dir = 1;
 		}  else if(strcmp(argv[i],"-n") == 0) {
 			if(argc>i) { 
-				name_tok_level = strtol(argv[++i], NULL, 10);
+				name_tok_level = strtol(argv[i+1], NULL, 10);
+				if(name_tok_level != 0) {
+					i++;
+				}
 			}
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
