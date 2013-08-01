@@ -84,9 +84,7 @@ int main( int argc, const char* argv[])
 				}
 			}
 		} else if(strcmp(argv[i],"-a") == 0) {
-			if(argc>i) {
-				no_alpha = 0;
-			}
+			no_alpha = 0;
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;

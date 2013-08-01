@@ -26,6 +26,8 @@ void Usage(void)
 	printf("-n (Optional) Creates a sub directory under the \"-o dir\" with the name mesh\n");
 	printf("   If \"depth\" is specified it will create sub directories for strings between\n");
 	printf("   the \"_\" in the mesh name.  Can be combined with -f\n");
+	
+	printf("-a (Optional) Includes alpha channel in texture output. \n");
 
 	printf("-h Displays this information\n");
 }
@@ -80,9 +82,7 @@ int main( int argc, const char* argv[])
 				}
 			}
 		} else if(strcmp(argv[i],"-a") == 0) {
-			if(argc>i) {
-				no_alpha = 0;
-			}
+			no_alpha = 0;
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;
