@@ -30,6 +30,8 @@ void Usage(void)
 	printf("   If \"depth\" is specified it will create sub directories for strings between\n");
 	printf("   the \"_\" in the mesh name.  Can be combined with -f\n");
 
+	printf("-a (Optional) Includes alpha channel in texture output. \n");
+
 	printf("-h Displays this information\n");
 }
 

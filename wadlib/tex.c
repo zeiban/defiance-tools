@@ -24,7 +24,7 @@ int WadWriteTexToPng(wad_record * wr,  int y_invert, uint32_t no_alpha, const ch
 	return 0;
 }
 
-int WadWriteTexToDds(wad_record * wr,  int y_invert, const char * dir, const char * name) {
+int WadWriteTexToDds(wad_record * wr,  int y_invert, uint32_t no_alpha, const char * dir, const char * name) {
 	char filename[512];
 	FILE * file;
 	rmid_file rf;
