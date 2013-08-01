@@ -12,7 +12,7 @@
 void Usage(void)
 {
 	printf("Extracts Defiance static meshes and converts them to OBJ, MTL, and PNG files\n");
-	printf("Usage: mes2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth]\n");
+	printf("Usage: mes2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth] [-a]\n");
 	printf("-w (Required) Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	
 	printf("-o (Optional) Directory to output OBJ, MTL & PNG files otherwise the current\n"); 
@@ -45,6 +45,7 @@ int main( int argc, const char* argv[])
 	const char * search_name = NULL;
 	uint32_t create_wad_dir = 0;
 	uint32_t create_name_dir = 0;
+	uint32_t no_alpha = 1;
 	char wad_out_dir[256];
 	char basename[256];
 	char name[512];
@@ -77,6 +78,10 @@ int main( int argc, const char* argv[])
 				if(name_tok_level != 0) {
 					i++;
 				}
+			}
+		} else if(strcmp(argv[i],"-a") == 0) {
+			if(argc>i) {
+				no_alpha = 0;
 			}
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
@@ -173,7 +178,7 @@ int main( int argc, const char* argv[])
 
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteMesToObj(&wd, wr, full_out_dir) != 0) {
+					if(WadWriteMesToObj(&wd, wr, no_alpha, full_out_dir) != 0) {
 						printf("Failed to write OBJ/MTL file\n");
 					} else {
 						printf("\n");

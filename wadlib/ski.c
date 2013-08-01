@@ -15,7 +15,7 @@ typedef struct {
 	uint32_t unk8;
 } ski_mesh_group_record;
 
-int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, const char * dir) {
+int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const char * dir) {
 	uint8_t * data;
 	mes_ski_header * header;
 	uint32_t * mesh_material_ids;
@@ -102,7 +102,7 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, const char * dir) {
 				WadRecordResolveName(twr);
 				if(material_params[p].param_type == RMID_MAT_PARAM_COLOR1) {
 					RmidLoadFromFile(twr->filename, twr->data_offset, twr->data_size, &trf);
-					RmidWriteTexToPng(&trf, 0, 1, dir, twr->name); 
+					RmidWriteTexToPng(&trf, 0, no_alpha, dir, twr->name); 
 					fprintf(out_file, "map_Ka %s.png\n", twr->name);
 					fprintf(out_file, "map_Kd %s.png\n", twr->name);
 					RmidFree(&trf);

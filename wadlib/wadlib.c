@@ -184,7 +184,7 @@ void WadDirFree(wad_dir * wd) {
 	free(wd->files);
 }
 
-static int WadWriteObj(wad_dir * wd,  wad_record * wr, const char * dir) {
+static int WadWriteObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha ,const char * dir) {
 	uint8_t * data;
 	mes_ski_header * header;
 	uint32_t * mesh_material_ids;
@@ -263,7 +263,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record * wr, const char * dir) {
 				WadRecordResolveName(twr);
 				if(material_params[p].param_type == RMID_MAT_PARAM_COLOR1) {
 					RmidLoadFromFile(twr->filename, twr->data_offset, twr->data_size, &trf);
-					RmidWriteTexToPng(&trf, 0, 1, dir, twr->name); 
+					RmidWriteTexToPng(&trf, 0, no_alpha, dir, twr->name); 
 					fprintf(out_file, "map_Ka %s.png\n", twr->name);
 					fprintf(out_file, "map_Kd %s.png\n", twr->name);
 					RmidFree(&trf);
@@ -392,11 +392,11 @@ int WadWriteRecordToRmid(wad_record * wr,  const char * dir, const char * name) 
 	return 0;
 }
 
-int WadWriteMesToObj(wad_dir * wd,  wad_record * wr, const char * dir) {
+int WadWriteMesToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const char * dir) {
 	if(wr->type != RMID_TYPE_MES) {
 		return 1;
 	}
-	return WadWriteObj(wd, wr, dir);
+	return WadWriteObj(wd, wr, no_alpha, dir);
 }
 
 
