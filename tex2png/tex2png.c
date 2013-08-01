@@ -11,13 +11,13 @@
 
 void Usage(void)
 {
-	printf("Usage tex2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f]\n");
+	printf("Usage tex2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-oa]\n");
 	printf("Extracts Defiance Texture and converts them to PNG files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-o\t (Optional) Directory to output PNG files otherwise the current directory is used\n");
 	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
 	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
-	printf("-a (Optional) Includes alpha channel in texture output. \n");
+	printf("-oa (Optional) Alpha channel opaque in texture output. \n");
 	printf("-h\t Displays this information\n");
 }
 
@@ -36,7 +36,7 @@ int main( int argc, const char* argv[])
 	const char * search_name = NULL;
 	uint32_t create_wad_dir = 0;
 	uint32_t create_name_dir = 0;
-	uint32_t no_alpha = 1;
+	uint32_t opaque_alpha = 0;
 	char wad_out_dir[256];
 	char basename[256];
 	char full_out_dir[512];
@@ -58,8 +58,8 @@ int main( int argc, const char* argv[])
 			}
 		}  else if(strcmp(argv[i],"-f") == 0) {
 			create_wad_dir = 1;
-		} else if(strcmp(argv[i],"-a") == 0) {
-				no_alpha = 0;
+		} else if(strcmp(argv[i],"-oa") == 0) {
+				opaque_alpha = 1;
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;
@@ -117,7 +117,7 @@ int main( int argc, const char* argv[])
 	
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteTexToPng(wr, 0, no_alpha, full_out_dir, wr->name) != 0) {
+					if(WadWriteTexToPng(wr, 0, opaque_alpha, full_out_dir, wr->name) != 0) {
 						printf("Failed to write PNG file\n");
 					} else {
 						printf("\n");

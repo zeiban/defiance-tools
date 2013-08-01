@@ -67,11 +67,11 @@ void WadDirFree(wad_dir * wd);
 
 int WadWriteRecordToRmid(wad_record * wr,  const char * dir, const char * name);
 
-int WadWriteTexToPng(wad_record * wr, int y_invert, uint32_t no_alpha, const char * dir, const char * name);
-int WadWriteTexToDds(wad_record * wr, int y_invert, uint32_t no_alpha, const char * dir, const char * name);
+int WadWriteTexToPng(wad_record * wr, int y_invert, uint32_t opaque_alpha, const char * dir, const char * name);
+int WadWriteTexToDds(wad_record * wr, int y_invert, uint32_t opaque_alpha, const char * dir, const char * name);
 
-int WadWriteMesToObj(wad_dir * wd, wad_record * wr,  uint32_t no_alpha, const char * dir);
-int WadWriteSkiToObj(wad_dir * wd, wad_record * wr,  uint32_t no_alpha, const char * dir);
+int WadWriteMesToObj(wad_dir * wd, wad_record * wr,  uint32_t opaque_alpha, const char * dir);
+int WadWriteSkiToObj(wad_dir * wd, wad_record * wr,  uint32_t opaque_alpha, const char * dir);
 
 typedef struct 
 {

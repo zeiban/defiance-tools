@@ -12,7 +12,7 @@
 void Usage(void)
 {
 	printf("Extracts Defiance static meshes and converts them to OBJ, MTL, and PNG files\n");
-	printf("Usage: mes2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth] [-a]\n");
+	printf("Usage: mes2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth] [-oa]\n");
 	printf("-w (Required) Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	
 	printf("-o (Optional) Directory to output OBJ, MTL & PNG files otherwise the current\n"); 
@@ -27,7 +27,7 @@ void Usage(void)
 	printf("   If \"depth\" is specified it will create sub directories for strings between\n");
 	printf("   the \"_\" in the mesh name.  Can be combined with -f\n");
 	
-	printf("-a (Optional) Includes alpha channel in texture output. \n");
+	printf("-oa (Optional) Alpha channel opaque in texture output. \n");
 
 	printf("-h Displays this information\n");
 }
@@ -47,7 +47,7 @@ int main( int argc, const char* argv[])
 	const char * search_name = NULL;
 	uint32_t create_wad_dir = 0;
 	uint32_t create_name_dir = 0;
-	uint32_t no_alpha = 1;
+	uint32_t opaque_alpha = 0;
 	char wad_out_dir[256];
 	char basename[256];
 	char name[512];
@@ -81,8 +81,8 @@ int main( int argc, const char* argv[])
 					i++;
 				}
 			}
-		} else if(strcmp(argv[i],"-a") == 0) {
-			no_alpha = 0;
+		} else if(strcmp(argv[i],"-oa") == 0) {
+			opaque_alpha = 0;
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;
@@ -178,7 +178,7 @@ int main( int argc, const char* argv[])
 
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteMesToObj(&wd, wr, no_alpha, full_out_dir) != 0) {
+					if(WadWriteMesToObj(&wd, wr, opaque_alpha, full_out_dir) != 0) {
 						printf("Failed to write OBJ/MTL file\n");
 					} else {
 						printf("\n");
