@@ -43,7 +43,7 @@ General library for reading and dumping asset records from WAD files. Useful if 
 ## Releases ##
 #####v0.5.0#####
 * Added warning for unknown command-line params.
-* Added -lod switch to ski2obj to level of detail to extract. 1=High, 2=Medium and 3= Low
+* Added -lod switch to ski2obj to specify level of detail to extract. 1=High, 2=Medium and 3= Low
 * Fixed switching parsing bug. 
 * Added -mml switch to specify the mipmap level to extract. Largest mipmap starts at 0 and gets progressively smaller by a factor of 2 as the level becomes larger.   
 
