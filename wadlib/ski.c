@@ -156,14 +156,16 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, uint32_t
 	vertex_counter = 0;
 	mesh_counter = 0;
 	DEBUG_PRINT(("Mesh Groups %d\n", header->total_mesh_groups));
+
+	if(level_of_detail > header->total_mesh_groups) {
+		printf("Requested LoD %d is too high. Using %d instead.\n", level_of_detail, header->total_mesh_groups);
+		level_of_detail = header->total_mesh_groups; 
+	}
+
 	for(mg = 0; mg < header->total_mesh_groups; mg++) {
 		if(level_of_detail > 0) {
-			if(level_of_detail > header->total_mesh_groups) {
-				printf("Requested LoD %d is too high. Using %d instead,\n", mg, header->total_mesh_groups);
-				level_of_detail = header->total_mesh_groups; 
-			}
-		
 			if((level_of_detail-1) != mg) {
+				mesh_counter += mesh_group_records[mg].total_meshes;
 				continue;
 			}
 		}
