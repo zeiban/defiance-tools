@@ -15,6 +15,7 @@
 #include "objfile.h"
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define CHUNK 1024
 
 int WadFileLoad(wad_file * wf, const char * filename)  {
@@ -675,6 +676,9 @@ int RmidWriteTexToPng(rmid_file * rf,  uint32_t y_invert, uint32_t opaque_alpha,
 			width = rmidth->mmr1[i].width;
 			height = rmidth->mmr1[i].height;
 		}
+	
+		width = MAX(width,4);
+		height = MAX(height,4);
 
 		image = (uint32_t *) malloc(width * height * 4); 
 		
