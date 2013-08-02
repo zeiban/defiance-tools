@@ -29,10 +29,10 @@ void Usage(void)
 	printf("     If \"depth\" is specified it will create sub directories for strings between\n");
 	printf("     the \"_\" in the mesh name.  Can be combined with -f\n");
 	
-	printf("-oa  (Optional) Alpha channel opaque in texture output. \n");
+	printf("-oa  (Optional) Alpha channel is opaque in texture output.\n");
 
 	printf("-mml (Optional) Specific mipmap level to extract for textures. 0 is the largest\n");
-	printf("	  decreasing by a factor of 2 as the level get higher. Defaults to 0\n");
+	printf("     decreasing by a factor of 2 as the level get higher. Defaults to 0.\n");
 
 	printf("-h   Displays this information\n");
 }

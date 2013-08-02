@@ -16,7 +16,7 @@ void Usage(void)
 {
 	printf("Extracts Defiance skinned meshes and converts them to OBJ, MTL, and PNG files\n");
 	printf("Usage: ski2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth] [-oa]\n");
-	printf("					[-lod level] [-mml level]\n");
+	printf("                    [-lod level] [-mml level]\n");
 
 	printf("-w   (Required) Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	
@@ -32,15 +32,16 @@ void Usage(void)
 	printf("     If \"depth\" is specified it will create sub directories for strings between\n");
 	printf("     the \"_\" in the mesh name.  Can be combined with -f\n");
 
-	printf("-oa  (Optional) Alpha channel opaque in texture output. \n");
+	printf("-oa  (Optional) Alpha channel is opaque in texture output. \n");
 
-	printf("-lod (Optional) Specific level of detail mesh to extract. 1=High, 2=Medium, 2=Low\n");
-	printf("	  Not all meshes have multiple LoDs. If not specified all LoDs are extracted\n");
+	printf("-lod (Optional) Specific level of detail mesh to extract.\n");
+	printf("     1=High, 2=Medium, 2=Low. Not all meshes have multiple\n"); 
+	printf("     LoDs. If not specified all LoDs are extracted\n");
 
 	printf("-mml (Optional) Specific mipmap level to extract for textures. 0 is the largest\n");
-	printf("	  decreasing by a factor of 2 as the level get higher. Defaults to 0 \n");
+	printf("     decreasing by a factor of 2 as the level get higher. Defaults to 0 \n");
 
-	printf("-h Displays this information\n");
+	printf("-h   Displays this information\n");
 }
 
 int main( int argc, const char* argv[])
