@@ -184,7 +184,7 @@ void WadDirFree(wad_dir * wd) {
 	free(wd->files);
 }
 
-static int WadWriteObj(wad_dir * wd,  wad_record * wr, uint32_t opaque_alpha ,const char * dir) {
+static int WadWriteObj(wad_dir * wd,  wad_record * wr, uint32_t opaque_alpha , uint32_t mipmap_level,const char * dir) {
 	uint8_t * data;
 	mes_ski_header * header;
 	uint32_t * mesh_material_ids;
@@ -263,7 +263,7 @@ static int WadWriteObj(wad_dir * wd,  wad_record * wr, uint32_t opaque_alpha ,co
 				WadRecordResolveName(twr);
 				if(material_params[p].param_type == RMID_MAT_PARAM_COLOR1) {
 					RmidLoadFromFile(twr->filename, twr->data_offset, twr->data_size, &trf);
-					RmidWriteTexToPng(&trf, 0, opaque_alpha, dir, twr->name); 
+					RmidWriteTexToPng(&trf, 0, opaque_alpha, mipmap_level, dir, twr->name); 
 					fprintf(out_file, "map_Ka %s.png\n", twr->name);
 					fprintf(out_file, "map_Kd %s.png\n", twr->name);
 					RmidFree(&trf);
@@ -392,11 +392,11 @@ int WadWriteRecordToRmid(wad_record * wr,  const char * dir, const char * name) 
 	return 0;
 }
 
-int WadWriteMesToObj(wad_dir * wd,  wad_record * wr, uint32_t opaque_alpha, const char * dir) {
+int WadWriteMesToObj(wad_dir * wd,  wad_record * wr, uint32_t opaque_alpha, uint32_t mipmap_level, const char * dir) {
 	if(wr->type != RMID_TYPE_MES) {
 		return 1;
 	}
-	return WadWriteObj(wd, wr, opaque_alpha, dir);
+	return WadWriteObj(wd, wr, opaque_alpha, mipmap_level, dir);
 }
 
 
@@ -644,7 +644,7 @@ static int PngWriteToFile(FILE * file, uint32_t y_invert, uint32_t bits_per_pixe
 	return 0;
 }
 
-int RmidWriteTexToPng(rmid_file * rf,  uint32_t y_invert, uint32_t opaque_alpha, const char * dir, const char * name) {
+int RmidWriteTexToPng(rmid_file * rf,  uint32_t y_invert, uint32_t opaque_alpha, uint32_t mipmap_level, const char * dir, const char * name) {
 	rmid_tex_header * rmidth;
 	uint8_t * bytes;
 	uint8_t * data;
@@ -654,33 +654,48 @@ int RmidWriteTexToPng(rmid_file * rf,  uint32_t y_invert, uint32_t opaque_alpha,
 	uint32_t i;
 	char filename[256];
 	uint32_t m;
+	uint32_t width, height;
 
 	rmidth = (rmid_tex_header*)((uint8_t *)rf->data + sizeof(rmid_header));
 	bytes = ((uint8_t*)rf->data) + 96;
 
 	data = ((uint8_t *)rf->data) + sizeof(rmid_header) + sizeof(rmid_tex_header);
 
-	if(rmidth->format == 1 || rmidth->format == 3  || rmidth->format == 8)
-	{
-		image = (uint32_t *) malloc(rmidth->mmh1.width * rmidth->mmh1.height * 4); 
+	if(rmidth->format == 1 || rmidth->format == 3  || rmidth->format == 8) {
+		if(mipmap_level > rmidth->mmh1.mipmap_count) {
+			mipmap_level = rmidth->mmh1.mipmap_count;
+		}
+
+		width = rmidth->mmh1.width;
+		height = rmidth->mmh1.height;
+		for(i=0; i<mipmap_level; i++) {
+			if(i>0) {
+				data += (rmidth->mmr1[i-1].size);
+			}
+			width = rmidth->mmr1[i].width;
+			height = rmidth->mmr1[i].height;
+		}
+
+		image = (uint32_t *) malloc(width * height * 4); 
+		
 		blocks = data;
 
 		if(rmidth->format == 1) {
-			DecompressDXT1(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
+			DecompressDXT1(width, height, blocks, image); 
 		} else if(rmidth->format == 8 || rmidth->format == 3){
-			DecompressDXT5(rmidth->mmh1.width, rmidth->mmh1.height, blocks, image); 
+			DecompressDXT5(width, height, blocks, image); 
 		}
 
 		if(opaque_alpha) {
 			// Set the alpha to 255;
-			for(i=0; i < (rmidth->mmh1.width * rmidth->mmh1.height * 4); i += 4) {
+			for(i=0; i < (width * height * 4); i += 4) {
 				*(((uint8_t * )image) + i + 3) = 255;
 			}
 		}
 
 		sprintf_s(filename,sizeof(filename), "%s\\%s.png", dir, name);
 		if(fopen_s(&file, filename, "wb") == 0) {
-			if(PngWriteToFile(file, y_invert, 32, rmidth->mmh1.width, rmidth->mmh1.height, (uint8_t *)image) != 0){
+			if(PngWriteToFile(file, y_invert, 32, width, height, (uint8_t *)image) != 0){
 				printf("Failed to write PNG file\n");
 			}
 		} else {

@@ -16,26 +16,29 @@ void Usage(void)
 {
 	printf("Extracts Defiance skinned meshes and converts them to OBJ, MTL, and PNG files\n");
 	printf("Usage: ski2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth] [-oa]\n");
-	printf("					[-l level]\n");
+	printf("					[-lod level] [-mml level]\n");
 
-	printf("-w (Required) Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
+	printf("-w   (Required) Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	
-	printf("-o (Optional) Directory to output OBJ, MTL & PNG files otherwise the current\n"); 
-	printf("   directory is used.\n");
+	printf("-o   (Optional) Directory to output OBJ, MTL & PNG files otherwise the current\n"); 
+	printf("     directory is used.\n");
 
-	printf("-s (Optional) Only extracts files that have \"search\" in the name.\n");
+	printf("-s   (Optional) Only extracts files that have \"search\" in the name.\n");
 
-	printf("-f (Optional) Creates a sub directory under the \"-o dir\" with the name of\n");
-	printf("    the WAD file. Can be combined with -n.\n");
+	printf("-f   (Optional) Creates a sub directory under the \"-o dir\" with the name of\n");
+	printf("     the WAD file. Can be combined with -n.\n");
 
-	printf("-n (Optional) Creates a sub directory under the \"-o dir\" with the name mesh\n");
-	printf("   If \"depth\" is specified it will create sub directories for strings between\n");
-	printf("   the \"_\" in the mesh name.  Can be combined with -f\n");
+	printf("-n   (Optional) Creates a sub directory under the \"-o dir\" with the name mesh\n");
+	printf("     If \"depth\" is specified it will create sub directories for strings between\n");
+	printf("     the \"_\" in the mesh name.  Can be combined with -f\n");
 
-	printf("-oa (Optional) Alpha channel opaque in texture output. \n");
+	printf("-oa  (Optional) Alpha channel opaque in texture output. \n");
 
-	printf("-l  (Optional) Specific level of detail mesh to extract. 1=High, 2=Medium, 2=Low\n");
-	printf("	Not all meshes have multiple LoDs. If not specified all LoDs are extracted\n");
+	printf("-lod (Optional) Specific level of detail mesh to extract. 1=High, 2=Medium, 2=Low\n");
+	printf("	  Not all meshes have multiple LoDs. If not specified all LoDs are extracted\n");
+
+	printf("-mml (Optional) Specific mipmap level to extract for textures. 0 is the largest\n");
+	printf("	  decreasing by a factor of 2 as the level get higher. Defaults to 0 \n");
 
 	printf("-h Displays this information\n");
 }
@@ -56,6 +59,7 @@ int main( int argc, const char* argv[])
 	uint32_t create_wad_dir = 0;
 	uint32_t opaque_alpha = 0;
 	uint32_t level_of_detail = 0;
+	uint32_t mipmap_level = 0;
 	char wad_out_dir[256];
 	char basename[256];
 	char name[512];
@@ -89,10 +93,17 @@ int main( int argc, const char* argv[])
 					i++;
 				}
 			}
-		}  else if(strcmp(argv[i],"-l") == 0) {
+		}  else if(strcmp(argv[i],"-lod") == 0) {
 			if(argc>i) { 
 				level_of_detail = strtol(argv[i+1], NULL, 10);
 				if(level_of_detail != 0) {
+					i++;
+				}
+			}
+		}  else if(strcmp(argv[i],"-mml") == 0) {
+			if(argc>i) { 
+				mipmap_level = strtol(argv[i+1], NULL, 10);
+				if(mipmap_level != 0) {
 					i++;
 				}
 			}
@@ -208,7 +219,7 @@ int main( int argc, const char* argv[])
 
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteSkiToObj(&wd, wr, opaque_alpha, level_of_detail, full_out_dir) != 0) {
+					if(WadWriteSkiToObj(&wd, wr, opaque_alpha, level_of_detail, mipmap_level, full_out_dir) != 0) {
 						printf("Failed to write OBJ/MTL file\n");
 					} else {
 						printf("\n");

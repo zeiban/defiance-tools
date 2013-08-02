@@ -4,7 +4,7 @@
 #include "wadlib.h"
 #include "dds.h"
 
-int WadWriteTexToPng(wad_record * wr,  int y_invert, uint32_t opaque_alpha, const char * dir, const char * name) {
+int WadWriteTexToPng(wad_record * wr,  int y_invert, uint32_t opaque_alpha, uint32_t mipmap_level, const char * dir, const char * name) {
 	rmid_file rf;
 
 	if(wr->type != RMID_TYPE_TEX) {
@@ -15,7 +15,7 @@ int WadWriteTexToPng(wad_record * wr,  int y_invert, uint32_t opaque_alpha, cons
 		return 1;
 	}
 	
-	if(RmidWriteTexToPng(&rf, y_invert, opaque_alpha, dir, name == NULL ? name : wr->name) != 0) {
+	if(RmidWriteTexToPng(&rf, y_invert, opaque_alpha, mipmap_level, dir, name == NULL ? name : wr->name) != 0) {
 		RmidFree(&rf);
 		return 1;
 	}

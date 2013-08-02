@@ -48,6 +48,7 @@ int main( int argc, const char* argv[])
 	uint32_t create_wad_dir = 0;
 	uint32_t create_name_dir = 0;
 	uint32_t opaque_alpha = 0;
+	uint32_t mipmap_level = 0;
 	char wad_out_dir[256];
 	char basename[256];
 	char name[512];
@@ -78,6 +79,13 @@ int main( int argc, const char* argv[])
 			if(argc>i) { 
 				name_tok_level = strtol(argv[i+1], NULL, 10);
 				if(name_tok_level != 0) {
+					i++;
+				}
+			}
+		}  else if(strcmp(argv[i],"-mml") == 0) {
+			if(argc>i) { 
+				mipmap_level = strtol(argv[i+1], NULL, 10);
+				if(mipmap_level != 0) {
 					i++;
 				}
 			}
@@ -180,7 +188,7 @@ int main( int argc, const char* argv[])
 
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteMesToObj(&wd, wr, opaque_alpha, full_out_dir) != 0) {
+					if(WadWriteMesToObj(&wd, wr, opaque_alpha, mipmap_level, full_out_dir) != 0) {
 						printf("Failed to write OBJ/MTL file\n");
 					} else {
 						printf("\n");

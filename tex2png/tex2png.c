@@ -37,6 +37,7 @@ int main( int argc, const char* argv[])
 	uint32_t create_wad_dir = 0;
 	uint32_t create_name_dir = 0;
 	uint32_t opaque_alpha = 0;
+	uint32_t mipmap_level = 0;
 	char wad_out_dir[256];
 	char basename[256];
 	char full_out_dir[512];
@@ -60,6 +61,13 @@ int main( int argc, const char* argv[])
 			create_wad_dir = 1;
 		} else if(strcmp(argv[i],"-oa") == 0) {
 				opaque_alpha = 1;
+		}  else if(strcmp(argv[i],"-mml") == 0) {
+			if(argc>i) { 
+				mipmap_level = strtol(argv[i+1], NULL, 10);
+				if(mipmap_level != 0) {
+					i++;
+				}
+			}
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;
@@ -119,7 +127,7 @@ int main( int argc, const char* argv[])
 	
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteTexToPng(wr, 0, opaque_alpha, full_out_dir, wr->name) != 0) {
+					if(WadWriteTexToPng(wr, 0, opaque_alpha, mipmap_level, full_out_dir, wr->name) != 0) {
 						printf("Failed to write PNG file\n");
 					} else {
 						printf("\n");
