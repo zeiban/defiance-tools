@@ -11,13 +11,16 @@
 
 void Usage(void)
 {
-	printf("Usage tex2png.exe  [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f] [-oa]\n");
+	printf("Usage tex2png.exe [-w wad_dir] [-o output_dir] [-s search_name] [-f] [-oa]\n");
+	printf("                  [-mml level]\n");
 	printf("Extracts Defiance Texture and converts them to PNG files\n");
-	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
-	printf("-o\t (Optional) Directory to output PNG files otherwise the current directory is used\n");
-	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
-	printf("-f\t (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
-	printf("-oa (Optional) Alpha channel opaque in texture output. \n");
+	printf("-w   Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
+	printf("-o   (Optional) Directory to output PNG files otherwise the current directory is used\n");
+	printf("-s   (Optional) Only extracts files that have <search_name> in the name\n");
+	printf("-f   (Optional) Creates a sub directory under the <output_dir> with the name of the WAD file\n");
+	printf("-oa  (Optional) Alpha channel opaque in texture output. \n");
+	printf("-mml (Optional) Specific mipmap level to extract for textures. 0 is the largest\n");
+	printf("	  decreasing by a factor of 2 as the level get higher. Defaults to 0\n");
 	printf("-h\t Displays this information\n");
 }
 
@@ -46,15 +49,15 @@ int main( int argc, const char* argv[])
 
 	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-w") == 0) {
-			if(argc>i) {
+			if((argc-1)>i) {
 				wad_dir = argv[++i];
 			}
 		} else if(strcmp(argv[i],"-o") == 0) {
-			if(argc>i) {
+			if((argc-1)>i) {
 				out_dir = argv[++i];
 			}
 		} else if(strcmp(argv[i],"-s") == 0) {
-			if(argc>i) {
+			if((argc-1)>i) {
 				search_name = argv[++i];
 			}
 		}  else if(strcmp(argv[i],"-f") == 0) {
@@ -62,7 +65,7 @@ int main( int argc, const char* argv[])
 		} else if(strcmp(argv[i],"-oa") == 0) {
 				opaque_alpha = 1;
 		}  else if(strcmp(argv[i],"-mml") == 0) {
-			if(argc>i) { 
+			if((argc-1)>i) { 
 				mipmap_level = strtol(argv[i+1], NULL, 10);
 				if(mipmap_level != 0) {
 					i++;

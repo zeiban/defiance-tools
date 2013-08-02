@@ -73,35 +73,35 @@ int main( int argc, const char* argv[])
 
 	for(i=0; i<argc; i++) {
 		if(strcmp(argv[i],"-w") == 0) {
-			if(argc>i) {
+			if((argc-1)>i) {
 				wad_dir = argv[++i];
 			}
 		} else if(strcmp(argv[i],"-o") == 0) {
-			if(argc>i) {
+			if((argc-1)>i) {
 				out_dir = argv[++i];
 			}
 		} else if(strcmp(argv[i],"-s") == 0) {
-			if(argc>i) {
+			if((argc-1)>i) {
 				search_name = argv[++i];
 			}
 		}  else if(strcmp(argv[i],"-f") == 0) {
 			create_wad_dir = 1;
 		}  else if(strcmp(argv[i],"-n") == 0) {
-			if(argc>i) { 
+			if((argc-1)>i) { 
 				name_tok_level = strtol(argv[i+1], NULL, 10);
 				if(name_tok_level != 0) {
 					i++;
 				}
 			}
 		}  else if(strcmp(argv[i],"-lod") == 0) {
-			if(argc>i) { 
+			if((argc-1)>i) { 
 				level_of_detail = strtol(argv[i+1], NULL, 10);
 				if(level_of_detail != 0) {
 					i++;
 				}
 			}
 		}  else if(strcmp(argv[i],"-mml") == 0) {
-			if(argc>i) { 
+			if((argc-1)>i) { 
 				mipmap_level = strtol(argv[i+1], NULL, 10);
 				if(mipmap_level != 0) {
 					i++;
