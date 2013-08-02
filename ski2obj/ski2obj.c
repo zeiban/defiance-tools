@@ -16,6 +16,8 @@ void Usage(void)
 {
 	printf("Extracts Defiance skinned meshes and converts them to OBJ, MTL, and PNG files\n");
 	printf("Usage: ski2obj.exe  [-w dir] [-o dir] [-s search] [-c] [-f] [-n depth] [-oa]\n");
+	printf("					[-l level]\n");
+
 	printf("-w (Required) Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	
 	printf("-o (Optional) Directory to output OBJ, MTL & PNG files otherwise the current\n"); 
@@ -31,6 +33,9 @@ void Usage(void)
 	printf("   the \"_\" in the mesh name.  Can be combined with -f\n");
 
 	printf("-oa (Optional) Alpha channel opaque in texture output. \n");
+
+	printf("-l  (Optional) Specific level of detail mesh to extract. 1=High, 2=Medium, 2=Low\n");
+	printf("	Not all meshes have multiple LoDs. If not specified all LoDs are extracted\n");
 
 	printf("-h Displays this information\n");
 }
@@ -50,6 +55,7 @@ int main( int argc, const char* argv[])
 	const char * search_name = NULL;
 	uint32_t create_wad_dir = 0;
 	uint32_t opaque_alpha = 0;
+	uint32_t level_of_detail = 0;
 	char wad_out_dir[256];
 	char basename[256];
 	char name[512];
@@ -80,6 +86,13 @@ int main( int argc, const char* argv[])
 			if(argc>i) { 
 				name_tok_level = strtol(argv[i+1], NULL, 10);
 				if(name_tok_level != 0) {
+					i++;
+				}
+			}
+		}  else if(strcmp(argv[i],"-l") == 0) {
+			if(argc>i) { 
+				level_of_detail = strtol(argv[i+1], NULL, 10);
+				if(level_of_detail != 0) {
 					i++;
 				}
 			}
@@ -130,6 +143,13 @@ int main( int argc, const char* argv[])
 		}
 	} else {
 		printf("No\n");
+	}
+
+	printf("Level of Detail: ");
+	if(level_of_detail == 0) {
+		printf("All\n");
+	} else if (level_of_detail > 0) {
+		printf("%d\n", level_of_detail);
 	}
 
 	printf("Output directory: %s\n", out_dir);
@@ -188,7 +208,7 @@ int main( int argc, const char* argv[])
 
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
 
-					if(WadWriteSkiToObj(&wd, wr, opaque_alpha, full_out_dir) != 0) {
+					if(WadWriteSkiToObj(&wd, wr, opaque_alpha, level_of_detail, full_out_dir) != 0) {
 						printf("Failed to write OBJ/MTL file\n");
 					} else {
 						printf("\n");

@@ -71,7 +71,7 @@ int WadWriteTexToPng(wad_record * wr, int y_invert, uint32_t opaque_alpha, const
 int WadWriteTexToDds(wad_record * wr, int y_invert, uint32_t opaque_alpha, const char * dir, const char * name);
 
 int WadWriteMesToObj(wad_dir * wd, wad_record * wr,  uint32_t opaque_alpha, const char * dir);
-int WadWriteSkiToObj(wad_dir * wd, wad_record * wr,  uint32_t opaque_alpha, const char * dir);
+int WadWriteSkiToObj(wad_dir * wd, wad_record * wr,  uint32_t opaque_alpha, uint32_t level_of_detail, const char * dir);
 
 typedef struct 
 {

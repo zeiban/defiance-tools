@@ -4,6 +4,33 @@
 #include "objfile.h"
 
 typedef struct {
+	uint32_t	total_materials;	
+	uint32_t	total_mesh_groups;	
+	uint32_t	mesh_group_table_offset;	
+	uint32_t	unk4; 	
+
+	uint32_t	unk5;	
+	uint32_t	unk6;	
+	uint32_t	unk7;	
+	uint32_t	unk8;	
+
+	uint32_t	unk9;	
+	uint32_t	unk10;	
+	uint32_t	unk11;	
+	uint32_t	unk12;	
+
+	uint64_t mesh_table_offset;	
+	uint64_t mesh_material_ids_offset;	
+	uint64_t material_table_offset;	
+	uint64_t unk13; // Always 0	
+
+	uint32_t	unk21;	// last mesh data offset?
+	uint32_t	unk22;	// always 0x0000000 
+	uint32_t	unk23;	
+	uint32_t	unk24; // always 0x100000xx	
+} ski_header;
+
+typedef struct {
 	uint32_t total_meshes;
 	uint32_t unk2;
 	uint32_t unk3;
@@ -15,9 +42,9 @@ typedef struct {
 	uint32_t unk8;
 } ski_mesh_group_record;
 
-int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const char * dir) {
+int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, uint32_t level_of_detail, const char * dir) {
 	uint8_t * data;
-	mes_ski_header * header;
+	ski_header * header;
 	uint32_t * mesh_material_ids;
 	mes_ski_mesh_record * mesh_records;
 	mes_ski_material_record * material_records;
@@ -32,9 +59,10 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const ch
 	wad_record * swr;
 	wad_record * twr;
 	char filename[512];
-	uint32_t m, p, v, f;
+	uint32_t m, mg, p, v, f;
 	rmid_file trf;
 	uint32_t vertex_counter;
+	uint32_t mesh_counter;
 	uint32_t index_data_size;
 	void * vertex_data;	
 	uint8_t * vertex_byte_data;
@@ -59,7 +87,7 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const ch
 	}
 	data = (uint8_t *)rf.data;
 
-	header				= (mes_ski_header*)(data + sizeof(rmid_header));
+	header				= (ski_header*)(data + sizeof(rmid_header));
 	mesh_material_ids	= (uint32_t*)(data + header->mesh_material_ids_offset); 
 	mesh_records		= (mes_ski_mesh_record*)(data + header->mesh_table_offset);
 	material_records	= (mes_ski_material_record*)(data + header->material_table_offset);
@@ -115,11 +143,6 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const ch
 
 	total_meshes = 0;
 
-	for(m = 0; m < header->total_meshes; m++) {
-		total_meshes += mesh_group_records[m].total_meshes;		
-	}
-
-	DEBUG_PRINT(("Meshes %d\n", total_meshes));
 	sprintf_s(filename, sizeof(filename),"%s\\%s.obj",dir, wr->name);
 	if(fopen_s(&out_file, filename, "w") != 0) {
 		printf("ERROR: Unable to open file %s\n", filename);
@@ -131,62 +154,75 @@ int WadWriteSkiToObj(wad_dir * wd,  wad_record * wr, uint32_t no_alpha, const ch
 	fprintf(out_file, "mtllib %s.mtl\n", wr->name);
 
 	vertex_counter = 0;
-
-
-	for(m = 0;  m < total_meshes; m++) {
-		mesh_header = (mes_ski_mesh_header*)(data + mesh_records[m].offset);	
-		material_header = (mes_ski_material_header *)(data + material_records[mesh_material_ids[m]].offset);
-						
-		DEBUG_PRINT((" [%d] O=%d", m, mesh_records[m].offset));
-		DEBUG_PRINT((" S=%d", mesh_records[m].size));
-		DEBUG_PRINT((" BPV=%d", mesh_header->bytes_per_vertex));
-		DEBUG_PRINT((" V=%d", mesh_header->num_vertices1));
-		DEBUG_PRINT((" I=%d\n", mesh_header->num_indices1));
-
-		//mesh_header = (mes_ski_mesh_header*)(data + mesh_records[m].offset);
-	
-		swr = WadDirFindByID(wd, material_header->shader_id);
-													
-		index_data_size = (uint32_t)(mesh_records[m].size  - (mesh_header->index_data_offset - *(data + mesh_records[m].offset)));
-						
-
-		fprintf(out_file, "o %s_%d\n", wr->name, m);
-
-		// Vertices
-		vertex_data = (void*)(data + mesh_records[m].offset + mesh_header->vertex_data_offset);
-		vertex_byte_data = (uint8_t *)vertex_data;
-		for(v = 0; v < mesh_header->num_vertices1; v++) {
-			ObjWritePosition(out_file, mesh_header, vertex_byte_data); 
-			vertex_byte_data += mesh_header->bytes_per_vertex;
-		}
-
-		// Texture Coords
-		vertex_byte_data = (uint8_t *)vertex_data;
-		for(v = 0; v < mesh_header->num_vertices1; v++) {
-			ObjWriteTexCoord(out_file, mesh_header, vertex_byte_data); 
-			vertex_byte_data += mesh_header->bytes_per_vertex;
-		}
-
-		// Normals
-		vertex_byte_data = (uint8_t *)vertex_data;
-		for(v = 0; v < mesh_header->num_vertices1; v++) {
-			ObjWriteNormal(out_file, mesh_header, vertex_byte_data);
-			vertex_byte_data += mesh_header->bytes_per_vertex;
-		}
-
-		// Faces
-		fprintf(out_file, "usemtl %s_%d\n", swr->name,mesh_material_ids[m]);
-		fprintf(out_file, "s off\n");
-		face_data = (void *)(data + mesh_records[m].offset + mesh_header->index_data_offset);
-		fprintf(out_file, "# Faces %d\n",mesh_header->num_indices1/3);
-		for(f = 0; f < mesh_header->num_indices1/3; f++) {
-			if((index_data_size / 2) == mesh_header->num_indices1) {
-				ObjWriteFace16(out_file, vertex_counter, face_data, f); 
-			} else {
-				ObjWriteFace32(out_file, vertex_counter, face_data, f); 
+	mesh_counter = 0;
+	DEBUG_PRINT(("Mesh Groups %d\n", header->total_mesh_groups));
+	for(mg = 0; mg < header->total_mesh_groups; mg++) {
+		if(level_of_detail > 0) {
+			if(level_of_detail > header->total_mesh_groups) {
+				printf("Requested LoD %d is too high. Using %d instead,\n", mg, header->total_mesh_groups);
+				level_of_detail = header->total_mesh_groups; 
+			}
+		
+			if((level_of_detail-1) != mg) {
+				continue;
 			}
 		}
-		vertex_counter += mesh_header->num_vertices1;
+		DEBUG_PRINT(("  [%d] %d Meshes\n", mg, mesh_group_records[mg].total_meshes));
+		for(m = 0; m < mesh_group_records[mg].total_meshes; m++) {
+			mesh_header = (mes_ski_mesh_header*)(data + mesh_records[mesh_counter].offset);	
+			material_header = (mes_ski_material_header *)(data + material_records[mesh_material_ids[mesh_counter]].offset);
+						
+			DEBUG_PRINT(("    [%d] O=%d", mesh_counter, mesh_records[mesh_counter].offset));
+			DEBUG_PRINT((" S=%d", mesh_records[mesh_counter].size));
+			DEBUG_PRINT((" BPV=%d", mesh_header->bytes_per_vertex));
+			DEBUG_PRINT((" V=%d", mesh_header->num_vertices1));
+			DEBUG_PRINT((" I=%d\n", mesh_header->num_indices1));
+
+			//mesh_header = (mes_ski_mesh_header*)(data + mesh_records[m].offset);
+	
+			swr = WadDirFindByID(wd, material_header->shader_id);
+													
+			index_data_size = (uint32_t)(mesh_records[mesh_counter].size  - (mesh_header->index_data_offset - *(data + mesh_records[mesh_counter].offset)));
+						
+			fprintf(out_file, "o %s_%d\n", wr->name, mesh_counter);
+
+			// Vertices
+			vertex_data = (void*)(data + mesh_records[mesh_counter].offset + mesh_header->vertex_data_offset);
+			vertex_byte_data = (uint8_t *)vertex_data;
+			for(v = 0; v < mesh_header->num_vertices1; v++) {
+				ObjWritePosition(out_file, mesh_header, vertex_byte_data); 
+				vertex_byte_data += mesh_header->bytes_per_vertex;
+			}
+
+			// Texture Coords
+			vertex_byte_data = (uint8_t *)vertex_data;
+			for(v = 0; v < mesh_header->num_vertices1; v++) {
+				ObjWriteTexCoord(out_file, mesh_header, vertex_byte_data); 
+				vertex_byte_data += mesh_header->bytes_per_vertex;
+			}
+
+			// Normals
+			vertex_byte_data = (uint8_t *)vertex_data;
+			for(v = 0; v < mesh_header->num_vertices1; v++) {
+				ObjWriteNormal(out_file, mesh_header, vertex_byte_data);
+				vertex_byte_data += mesh_header->bytes_per_vertex;
+			}
+
+			// Faces
+			fprintf(out_file, "usemtl %s_%d\n", swr->name,mesh_material_ids[mesh_counter]);
+			fprintf(out_file, "s off\n");
+			face_data = (void *)(data + mesh_records[mesh_counter].offset + mesh_header->index_data_offset);
+			fprintf(out_file, "# Faces %d\n",mesh_header->num_indices1/3);
+			for(f = 0; f < mesh_header->num_indices1/3; f++) {
+				if((index_data_size / 2) == mesh_header->num_indices1) {
+					ObjWriteFace16(out_file, vertex_counter, face_data, f); 
+				} else {
+					ObjWriteFace32(out_file, vertex_counter, face_data, f); 
+				}
+			}
+			vertex_counter += mesh_header->num_vertices1;
+			mesh_counter++;
+		}
 	}
 	fclose(out_file);
 	RmidFree(&rf);
