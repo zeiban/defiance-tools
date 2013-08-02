@@ -81,6 +81,8 @@ int main( int argc, const char* argv[]) {
 		}  else if(strcmp(argv[i],"-h") == 0) {
 			Usage();
 			return 1;
+		} else {
+			printf("Warning: Unknown switch %s\n", argv[i]);
 		} 
 	}
 

@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -a -o c:\temp\defiance\ski2obj -f -n -oa -s ski_npc_darkmatter_bulwark</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\ski2obj -n 3 -oa -s ski_1pc_hm_outfit_armor_corporateoperative_t1</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\ski2obj -s ski_1pc_bm_soldier_armor_65_t4_hires</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\ski2obj -n 3 -oa -s ski_1pc_hm_outfit_armor_corporateoperative_t1</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
