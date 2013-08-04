@@ -47,13 +47,13 @@ typedef struct {
 } wad_dir;
 
 // Loads all the index records of a WAD file
-int WadFileLoad(wad_file * wf, const char * filename);
+//int WadFileLoad(wad_file * wf, const char * filename);
 
-// Resolves the asset name of the specified WAD index record
+// Resolves the asset name of the specified WAD record
 int WadRecordResolveName(wad_record * wr);
 
 // Must be called after WadFileLoad to free memory
-void WadFileFree(wad_file * wf);
+//void WadFileFree(wad_file * wf);
 
 // Loads directory with WAD files and retives all the indexes
 int WadDirLoad(wad_dir * wd, const char * filename);

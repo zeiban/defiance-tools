@@ -9,13 +9,13 @@
 #include "wadlib.h"
 
 void Usage(void) {
-	printf("Usage waddump.exe [-x] [-w <wad_dir>] [-o <output_dir>] [-s <search_name>] [-f]\n");
+	printf("Usage waddump.exe [-x] [-w wad_dir] [-o output_dir] [-s search_name] [-f]\n");
 	printf("Lists or Extract RMID assets from WAD files\n");
 	printf("-x\t Extracts assets to RMID files\n");
 	printf("-w\t Wad directory. eg. c:\\games\\defiance\\live\\wad\n");
 	printf("-o\t Directory to output RMID files. Current directory is used if not specified\n");
-	printf("-s\t (Optional) Only extracts files that have <search_name> in the name\n");
-	printf("-f\t (Optional) Extraction creates a sub directory under the <output_dir> with the name of the WAD file\n");
+	printf("-s\t (Optional) Only extracts files that have search_name in the name\n");
+	printf("-f\t (Optional) Extraction creates a sub directory under the output_dir with the name of the WAD file\n");
 	printf("-d\t (Optional) Display internal asset datetime stamp\n");
 	printf("-h\t Displays this information\n");
 }
