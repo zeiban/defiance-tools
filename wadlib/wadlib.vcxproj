@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxt.c" />
+    <ClCompile Include="mes.c" />
     <ClCompile Include="objfile.c" />
     <ClCompile Include="ski.c" />
     <ClCompile Include="snd.c" />
