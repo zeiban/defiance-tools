@@ -7,6 +7,7 @@
 
 
 #ifdef _WIN32
+
 uint32_t DirectoryExists(const char * path) {
   DWORD dwAttrib = GetFileAttributes(path);
 

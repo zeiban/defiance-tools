@@ -9,10 +9,47 @@ typedef void (CALLBACK* _AIL_mem_free_lock)(void *);
 typedef int (CALLBACK* _AIL_startup)();
 typedef int (CALLBACK* _AIL_shutdown)();
 
-int WadWriteSndToWav(wad_record * wr, const char * redist_dir, const char * out_dir, const char * name) {
+_AIL_decompress_ASI fn_AIL_decompress_ASI;
+_AIL_last_error fn_AIL_last_error;
+_AIL_set_redist_directory fn_AIL_set_redist_directory;
+_AIL_mem_free_lock fn_AIL_mem_free_lock;
+_AIL_startup fn_AIL_startup;
+_AIL_shutdown fn_AIL_shutdown;		
+HMODULE module = NULL;
+
+int WadMilesStartup(const char * redist_dir) {
 	char dll_filename[512];
+
+	if(module == NULL) {
+		sprintf_s(dll_filename, sizeof(dll_filename), "%s\\mss32.dll", redist_dir);
+		module = LoadLibrary(dll_filename);
+		if(module == NULL) {
+			printf("Unable to load mss32.dll from %s. Is the path correct?\n", dll_filename);
+			return 1;
+		}
+
+		fn_AIL_decompress_ASI = (_AIL_decompress_ASI)GetProcAddress(module, "_AIL_decompress_ASI@24");
+		fn_AIL_last_error = (_AIL_last_error)GetProcAddress(module, "_AIL_last_error@0");
+		fn_AIL_set_redist_directory = (_AIL_set_redist_directory)GetProcAddress(module, "_AIL_set_redist_directory@4");
+		fn_AIL_mem_free_lock = (_AIL_mem_free_lock)GetProcAddress(module, "_AIL_mem_free_lock@4");
+		fn_AIL_startup = (_AIL_startup)GetProcAddress(module, "_AIL_startup@0");
+		fn_AIL_shutdown = (_AIL_shutdown)GetProcAddress(module, "_AIL_shutdown@0");
+
+		if(fn_AIL_startup() == 0) {
+			printf("_AIL_startup FAILED\n");
+			return 1;
+		}
+		fn_AIL_set_redist_directory(redist_dir);	
+	}
+	return 0;
+}
+
+void WadMilesShutdown(void) {
+	fn_AIL_shutdown();
+	FreeLibrary(module);
+}
+int WadWriteSndToWav(wad_record * wr, const char * out_dir, const char * name) {
 	char out_filename[512];
-	HMODULE module;
 	FILE * in_file;
 	FILE * out_file;
 	rmid_file rf;
@@ -22,30 +59,13 @@ int WadWriteSndToWav(wad_record * wr, const char * redist_dir, const char * out_
 	void * out_data = NULL;
 	unsigned int out_size = 0;
 
-	_AIL_decompress_ASI fn_AIL_decompress_ASI;
-	_AIL_last_error fn_AIL_last_error;
-    _AIL_set_redist_directory fn_AIL_set_redist_directory;
-	_AIL_mem_free_lock fn_AIL_mem_free_lock;
-	_AIL_startup fn_AIL_startup;
-	_AIL_shutdown fn_AIL_shutdown;		
+	if(module == NULL) {
+		return 1;
+	}
 
 	if(wr->type != RMID_TYPE_SND) {
 		return 1;
 	}
-
-	sprintf_s(dll_filename, sizeof(dll_filename), "%s\\mss32.dll", redist_dir);
-	module = LoadLibrary(dll_filename);
-	if(module == NULL) {
-		printf("Unable to load mss32.dll from %s. Is the path correct?\n", dll_filename);
-		return 1;
-	}
-
-	fn_AIL_decompress_ASI = (_AIL_decompress_ASI)GetProcAddress(module, "_AIL_decompress_ASI@24");
-	fn_AIL_last_error = (_AIL_last_error)GetProcAddress(module, "_AIL_last_error@0");
-	fn_AIL_set_redist_directory = (_AIL_set_redist_directory)GetProcAddress(module, "_AIL_set_redist_directory@4");
-	fn_AIL_mem_free_lock = (_AIL_mem_free_lock)GetProcAddress(module, "_AIL_mem_free_lock@4");
-	fn_AIL_startup = (_AIL_startup)GetProcAddress(module, "_AIL_startup@0");
-	fn_AIL_shutdown = (_AIL_shutdown)GetProcAddress(module, "_AIL_shutdown@0");
 
 	if(fopen_s(&in_file, wr->filename, "rb") != 0) {
 		printf("ERROR: Unable to open file %s\n", wr->filename);
@@ -54,12 +74,6 @@ int WadWriteSndToWav(wad_record * wr, const char * redist_dir, const char * out_
 
 	fseek(in_file, (long)wr->data_offset, SEEK_SET);
 
-	if(fn_AIL_startup() == 0) {
-		printf("_AIL_startup FAILED\n");
-		return 1;
-	}
-
-	fn_AIL_set_redist_directory(redist_dir);
 	if(RmidLoad(in_file, wr->data_size, &rf) != 0) {
 		return 1;
 	}
@@ -78,14 +92,13 @@ int WadWriteSndToWav(wad_record * wr, const char * redist_dir, const char * out_
 		if(fopen_s(&out_file, out_filename, "wb") != 0) {
 			printf("Failed to open output file %s", out_filename);
 			fn_AIL_mem_free_lock(out_data);
-			fn_AIL_shutdown();
 			return 1;
 		}
 		fwrite(out_data, out_size, 1, out_file);
 		fclose(out_file);
 		fn_AIL_mem_free_lock(out_data);
-		fn_AIL_shutdown();
 	}
-	FreeLibrary(module);
+	RmidFree(&rf);
+
 	return 0;
 }

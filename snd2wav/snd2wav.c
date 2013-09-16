@@ -107,6 +107,11 @@ int main( int argc, const char* argv[])
 
 	printf(" %d files loaded\n",wd.total_files);
 
+	if(WadMilesStartup(redist_dir) != 0) {
+		printf("Failed Startup MSS");
+		return;
+	}
+
 	for(f = 0; f < wd.total_files; f++) {
 		for(r = 0; r < wd.files[f].total_records; r++) {
 			wr = &wd.files[f].records[r];
@@ -127,15 +132,17 @@ int main( int argc, const char* argv[])
 					}
 	
 					printf("0x%08X %s ", EndianSwap(wr->id), wr->name);
-
-					if(WadWriteSndToWav(wr, redist_dir, full_out_dir, wr->name) != 0) {
+					
+					if(WadWriteSndToWav(wr, full_out_dir, wr->name) != 0) {
 						printf("Failed to write WAV file\n");
 					} else {
 						printf("\n");
 					}
+					
 				}
 			}
 		}
 	} 
+	WadMilesShutdown();
 	WadDirFree(&wd);
 }

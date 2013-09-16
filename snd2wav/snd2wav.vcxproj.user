@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>-i c:\games\defiance\live\wad\sounds.wad -o c:\temp\defiance\snd2wav -m c:\games\defiance\live\MilesRedist -s snd_cin_101keys_dekusodeath_explo</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-w c:\games\defiance\live\wad -o c:\temp\defiance\snd2wav -m c:\games\defiance\live\MilesRedist -f</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
