@@ -41,6 +41,10 @@ Compares 2 directories containing WAD files and generates a CSV file that exapla
 General library for reading and dumping asset records from WAD files. Useful if you want to write your own tools. The API is still unstable so expect it to change. 
 
 ## Releases ##
+#####v0.5.2#####
+* Fixed a memory leak with snd2wav.
+* Optimized snd2wav to perform better now much faster.  
+
 #####v0.5.1#####
 * Fixed a memory issue with mip maps smaller than 4x4.
 
